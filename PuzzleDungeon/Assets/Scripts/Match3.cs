@@ -11,9 +11,10 @@ public class Match3 : MonoBehaviour
     public RectTransform gameBoard;
     [Header("Prefabs")]
     public GameObject nodePiece;
-
-    int width = 15;
-    int height = 15;
+    [HideInInspector]
+    public int width = 15;
+    [HideInInspector]
+    public int height = 15;
     int[] fills;
     Node[,] board;
 
@@ -22,6 +23,9 @@ public class Match3 : MonoBehaviour
     List<NodePiece> dead;
 
     System.Random random;
+    void Awake()
+    {
+    }
 
     void Start()
     {
@@ -33,81 +37,81 @@ public class Match3 : MonoBehaviour
         
     }
 
-    public void ApplyGravityToBoard()
-    {
-        for (int x = 5; x < width; x++)
-        {
-            for (int y = (height - 5); y >= 0; y--) //Start at the bottom and grab the next
-            {
-                Point p = new Point(x, y);
-                Node node = getNodeAtPoint(p);
-                int val = getValueAtPoint(p);
-                if (val != 0) continue; //If not a hole, move to the next
-                for (int ny = (y - 1); ny >= -1; ny--)
-                {
-                    Point next = new Point(x, ny);
-                    int nextVal = getValueAtPoint(next);
-                    if (nextVal == 0)
-                        continue;
-                    if (nextVal != -1)
-                    {
-                        Node gotten = getNodeAtPoint(next);
-                        NodePiece piece = gotten.getPiece();
+    // public void ApplyGravityToBoard()
+    // {
+    //     for (int x = 5; x < width; x++)
+    //     {
+    //         for (int y = (height - 5); y >= 0; y--) //Start at the bottom and grab the next
+    //         {
+    //             Point p = new Point(x, y);
+    //             Node node = getNodeAtPoint(p);
+    //             int val = getValueAtPoint(p);
+    //             if (val != 0) continue; //If not a hole, move to the next
+    //             for (int ny = (y - 1); ny >= -1; ny--)
+    //             {
+    //                 Point next = new Point(x, ny);
+    //                 int nextVal = getValueAtPoint(next);
+    //                 if (nextVal == 0)
+    //                     continue;
+    //                 if (nextVal != -1)
+    //                 {
+    //                     Node gotten = getNodeAtPoint(next);
+    //                     NodePiece piece = gotten.getPiece();
 
-                        //Set the hole
-                        node.SetPiece(piece);
-                        update.Add(piece);
+    //                     //Set the hole
+    //                     node.SetPiece(piece);
+    //                     update.Add(piece);
 
-                        //Make a new hole
-                        gotten.SetPiece(null);
-                    }
-                    else//Use dead ones or create new pieces to fill holes (hit a -1) only if we choose to
-                    {
-                        int newVal = fillPiece();
-                        NodePiece piece;
-                        Point fallPnt = new Point(x, (-1 - fills[x]));
-                        if(dead.Count > 0)
-                        {
-                            NodePiece revived = dead[0];
-                            revived.gameObject.SetActive(true);
-                            piece = revived;
+    //                     //Make a new hole
+    //                     gotten.SetPiece(null);
+    //                 }
+    //                 else//Use dead ones or create new pieces to fill holes (hit a -1) only if we choose to
+    //                 {
+    //                     int newVal = fillPiece();
+    //                     NodePiece piece;
+    //                     Point fallPnt = new Point(x, (-1 - fills[x]));
+    //                     if(dead.Count > 0)
+    //                     {
+    //                         NodePiece revived = dead[0];
+    //                         revived.gameObject.SetActive(true);
+    //                         piece = revived;
 
-                            dead.RemoveAt(0);
-                        }
-                        else
-                        {
-                            GameObject obj = Instantiate(nodePiece, gameBoard);
-                            NodePiece n = obj.GetComponent<NodePiece>();
-                            piece = n;
-                        }
+    //                         dead.RemoveAt(0);
+    //                     }
+    //                     else
+    //                     {
+    //                         GameObject obj = Instantiate(nodePiece, gameBoard);
+    //                         NodePiece n = obj.GetComponent<NodePiece>();
+    //                         piece = n;
+    //                     }
 
-                        piece.Initialize(newVal, p, pieces[newVal - 1]);
-                        piece.rect.anchoredPosition = getPositionFromPoint(fallPnt);
+    //                     piece.Initialize(newVal, p, pieces[newVal - 1]);
+    //                     piece.rect.anchoredPosition = getPositionFromPoint(fallPnt);
 
-                        Node hole = getNodeAtPoint(p);
-                        hole.SetPiece(piece);
-                        ResetPiece(piece);
-                        fills[x]++;
-                    }
-                    break;
-                }
-            }
-        }
-    }
+    //                     Node hole = getNodeAtPoint(p);
+    //                     hole.SetPiece(piece);
+    //                     ResetPiece(piece);
+    //                     fills[x]++;
+    //                 }
+    //                 break;
+    //             }
+    //         }
+    //     }
+    // }
 
-    FlippedPieces getFlipped(NodePiece p)
-    {
-        FlippedPieces flip = null;
-        for (int i = 0; i < flipped.Count; i++)
-        {
-            if (flipped[i].getOtherPiece(p) != null)
-            {
-                flip = flipped[i];
-                break;
-            }
-        }
-        return flip;
-    }
+    // FlippedPieces getFlipped(NodePiece p)
+    // {
+    //     FlippedPieces flip = null;
+    //     for (int i = 0; i < flipped.Count; i++)
+    //     {
+    //         if (flipped[i].getOtherPiece(p) != null)
+    //         {
+    //             flip = flipped[i];
+    //             break;
+    //         }
+    //     }
+    //     return flip;
+    // }
 
     void StartGame()
     {
@@ -115,8 +119,8 @@ public class Match3 : MonoBehaviour
         string seed = getRandomSeed();
         random = new System.Random(seed.GetHashCode());
         update = new List<NodePiece>();
-        flipped = new List<FlippedPieces>();
-        dead = new List<NodePiece>();
+        // flipped = new List<FlippedPieces>();
+        // dead = new List<NodePiece>();
 
         InitializeBoard();
         VerifyBoard();
@@ -242,28 +246,28 @@ public class Match3 : MonoBehaviour
         update.Add(piece);
     }
 
-    public void FlipPieces(Point one, Point two, bool main)
-    {
-        if (getValueAtPoint(one) < 0) return;
+    // public void FlipPieces(Point one, Point two, bool main)
+    // {
+    //     if (getValueAtPoint(one) < 0) return;
 
-        Node nodeOne = getNodeAtPoint(one);
-        NodePiece pieceOne = nodeOne.getPiece();
-        if (getValueAtPoint(two) > 0)
-        {
-            Node nodeTwo = getNodeAtPoint(two);
-            NodePiece pieceTwo = nodeTwo.getPiece();
-            nodeOne.SetPiece(pieceTwo);
-            nodeTwo.SetPiece(pieceOne);
+    //     Node nodeOne = getNodeAtPoint(one);
+    //     NodePiece pieceOne = nodeOne.getPiece();
+    //     if (getValueAtPoint(two) > 0)
+    //     {
+    //         Node nodeTwo = getNodeAtPoint(two);
+    //         NodePiece pieceTwo = nodeTwo.getPiece();
+    //         nodeOne.SetPiece(pieceTwo);
+    //         nodeTwo.SetPiece(pieceOne);
 
-            if(main)
-                flipped.Add(new FlippedPieces(pieceOne, pieceTwo));
+    //         if(main)
+    //             flipped.Add(new FlippedPieces(pieceOne, pieceTwo));
 
-            update.Add(pieceOne);
-            update.Add(pieceTwo);
-        }
-        else
-            ResetPiece(pieceOne);
-    }
+    //         update.Add(pieceOne);
+    //         update.Add(pieceTwo);
+    //     }
+    //     else
+    //         ResetPiece(pieceOne);
+    // }
 
     List<Point> isConnected(Point p, bool main)
     {
@@ -382,10 +386,6 @@ public class Match3 : MonoBehaviour
         board[p.x, p.y].value = v;
     }
 
-    Node getNodeAtPoint(Point p)
-    {
-        return board[p.x, p.y];
-    }
 
     int newValue(ref List<int> remove)
     {
@@ -407,11 +407,34 @@ public class Match3 : MonoBehaviour
             seed += acceptableChars[Random.Range(0, acceptableChars.Length)];
         return seed;
     }
+    public Node getNodeAtPoint(Point p)
+    {
+        return board[p.x, p.y];
+    }
 
     public Vector2 getPositionFromPoint(Point p)
     {
         return new Vector2(-288 + (64 * p.x), 288 - (64 * p.y));
     }
+    public List<NodePiece> GetNodePiecesFromTheSameLineX(NodePiece piece)
+    {
+        List<NodePiece> line = new List<NodePiece>();
+        for(int x = 0; x < width; x++)
+        {
+            line.Add(getNodeAtPoint(new Point(x,piece.index.y)).getPiece());
+        }
+        return line;
+    }
+    public List<NodePiece> GetNodePiecesFromTheSameLineY(NodePiece piece)
+    {
+        List<NodePiece> line = new List<NodePiece>();
+        for(int y = 0; y < height; y++)
+        {
+            line.Add(getNodeAtPoint(new Point(piece.index.x,y)).getPiece());
+        }
+        return line;
+    }
+
 }
 
 [System.Serializable]
