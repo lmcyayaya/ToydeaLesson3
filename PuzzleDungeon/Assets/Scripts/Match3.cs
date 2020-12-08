@@ -18,7 +18,8 @@ public class Match3 : MonoBehaviour
     int height = 13;
     int[] fills;
     Node[,] board;
-
+    List<List<Point>> comboList;
+    bool clear = false  ;
     
     List<NodePiece> dead;
 
@@ -32,41 +33,105 @@ public class Match3 : MonoBehaviour
         StartGame();
     }
 
+    void Update() 
+    {
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            clear = !clear;
+        }
+    }
     public void Match3Update()
     {
         
         List<Point> connected = new List<Point>();
+        comboList.Clear();
         for(int x = 4; x < 9; x++)
         {
             for(int y = 4;y < 9; y++)
             {
-                AddPoints(ref connected,isConnected(new Point(x,y),false));
+                if(!isContainPointInPointList(connected,new Point(x,y)))
+                    AddPoints(ref connected,isConnected(new Point(x,y),false));
+
             }
         }
+
         if(connected.Count == 0)
         {
             //沒對到東西要做的事在這
         }
         else
         {
-            CheckConnectTypeAndAmount(connected);
-            foreach(Point p in connected)
+            if(clear)
             {
-                Node node = getNodeAtPoint(p);
-                NodePiece nodePiece =node.getPiece();
-                if(nodePiece!=null)
-                    nodePiece.gameObject.SetActive(false);
-                node.SetPiece(null); 
+                CheckConnectTypeAndAmount(connected);
+                ComboListAdjust();
+
+
+                for(int i = 0; i< comboList.Count;i++)
+                {
+                    if(comboList[i].Count == 0)
+                    {
+                        comboList.Remove(comboList[i]);
+                    }
+                }
+
+                for(int i = 0; i < comboList.Count; i++)
+                {
+                    for(int j = 0; j < comboList[i].Count; j++)
+                    {
+                        
+                        //Debug.Log("第"+(i+1)+"組Combo"+"("+comboList[i][j].x+","+comboList[i][j].y+")" + ShowName(comboList[i][j]));
+                    }
+                }
+                Debug.Log(comboList.Count+"Combo");
+                for(int i = 0; i < comboList.Count;i++)
+                {
+                    Debug.Log("第"+(i+1)+"Combo "+ShowName(comboList[i][0]));
+                }
+                foreach(Point p in connected)
+                {
+                    Node node = getNodeAtPoint(p);
+                    NodePiece nodePiece =node.getPiece();
+                    if(nodePiece!=null)
+                        nodePiece.gameObject.SetActive(false);
+                    node.SetPiece(null); 
+                }
+
             }
+            
         }
+        
         StateManager.Instance.state = StateManager.State.dropping;
+    }
+
+    string ShowName(Point p)
+    {
+        switch(getValueAtPoint(p))
+        {
+            case 0:
+                return "blank";
+            break;
+            case 1:
+                return "cube";
+            break;
+            case 2:
+                return "cylider";
+            break;
+            case 3:
+                return "pryamid";
+            break;
+            case 4:
+                return "sphere";
+            break;
+        }
+        return null;
     }
 
     // public void ApplyGravityToBoard()
     // {
-    //     for (int x = 5; x < width; x++)
+    //     for (int x = 4; x < 9; x++)
     //     {
-    //         for (int y = (height - 5); y >= 0; y--) //Start at the bottom and grab the next
+    //         for (int y = 8 ; y > 3; y--) //Start at the bottom and grab the next
     //         {
     //             Point p = new Point(x, y);
     //             Node node = getNodeAtPoint(p);
@@ -123,13 +188,12 @@ public class Match3 : MonoBehaviour
     //         }
     //     }
     // }
-
-
     void StartGame()
     {
         fills = new int[width];
         string seed = getRandomSeed();
         random = new System.Random(seed.GetHashCode());
+        comboList = new List<List<Point>>();
         //update = new List<NodePiece>();
         // flipped = new List<FlippedPieces>();
         // dead = new List<NodePiece>();
@@ -139,7 +203,6 @@ public class Match3 : MonoBehaviour
         InstantiateBoard();
         CopyBoard();
     }
-
     void InitializeBoard()
     {
         board = new Node[width, height];
@@ -151,14 +214,57 @@ public class Match3 : MonoBehaviour
             }
         }
     }
+    void VerifyBoard()
+    {
+        List<int> remove;
+        for (int x = 4; x < 9; x++)
+        {
+            for (int y = 4; y < 9; y++)
+            {
+                Point p = new Point(x, y);
+                int val = getValueAtPoint(p);
+                if (val <= 0) continue;
+
+                remove = new List<int>();
+                while (isConnected(p, true).Count > 0)
+                {
+                    val = getValueAtPoint(p);
+                    if (!remove.Contains(val))
+                        remove.Add(val);
+                    setValueAtPoint(p, newValue(ref remove));
+                }
+            }
+        }
+    }    
+    void InstantiateBoard()
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                Node node = getNodeAtPoint(new Point(x, y));
+
+                int val = node.value;
+                if (val <= 0) continue;
+                GameObject p = Instantiate(nodePiece, gameBoard);
+                NodePiece piece = p.GetComponent<NodePiece>();
+                RectTransform rect = p.GetComponent<RectTransform>();
+                rect.anchoredPosition = new Vector2(-224 + (64 * x), 224  - (64 * y));
+                piece.Initialize(val, new Point(x, y), pieces[val - 1]);
+                node.SetPiece(piece);
+            }
+        }
+    }
     void CheckConnectTypeAndAmount(List<Point> connected)
     {
         int atk = 0;
         int move = 0 ;
         int def = 0;
         int sp = 0;
+
         foreach(Point p in connected)
         {
+            //Debug.Log("("+p.x+","+p.y+")");
             switch(getValueAtPoint(p))
             {
                 case 1 :
@@ -186,26 +292,200 @@ public class Match3 : MonoBehaviour
         }
         Debug.Log("Cube有"+atk+"個,"+"cylinder有"+move+"個,"+"prymid有"+def+"個,"+"sphere有"+sp+"個,");
     }
-    void VerifyBoard()
+    void ComboListAdjust()
     {
-        List<int> remove;
-        for (int x = 4; x < 9; x++)
-        {
-            for (int y = 4; y < 9; y++)
-            {
-                Point p = new Point(x, y);
-                int val = getValueAtPoint(p);
-                if (val <= 0) continue;
 
-                remove = new List<int>();
-                while (isConnected(p, true).Count > 0)
+        Point[] directions =
+        {
+            Point.up,
+            Point.right,
+            Point.down,
+            Point.left
+        };
+        for(int i = 0; i < comboList.Count; i++)
+        {
+            for(int j = 0; j < comboList[i].Count;j++)
+            {
+                foreach(Point dir in directions)
                 {
-                    val = getValueAtPoint(p);
-                    if (!remove.Contains(val))
-                        remove.Add(val);
-                    setValueAtPoint(p, newValue(ref remove));
+                    Point check = Point.add(comboList[i][j],dir);
+                    for(int k = i+1; k < comboList.Count; k ++)
+                    {
+                        if(isContainPointInPointList(comboList[k],check) && getValueAtPoint(comboList[i][j]) == getValueAtPoint(check))
+                        {
+                            comboList[i] = forComboAddPoints(comboList[i],comboList[k]);
+                            comboList[k].Clear();
+                        }
+                    }
+                }
+                
+            }
+        }
+
+
+
+    }
+    List<Point> isConnected(Point p, bool main)
+    {
+        
+        List<Point> connected = new List<Point>();
+        int val = getValueAtPoint(p);
+        Point[] directions =
+        {
+            Point.up,
+            Point.right,
+            Point.down,
+            Point.left
+        };
+        
+        foreach(Point dir in directions) //Checking if there is 2 or more same shapes in the directions
+        {
+            List<Point> line = new List<Point>();
+            int same = 0;
+            line.Add(p);
+            for(int i = 1; i < 5; i++)
+            {
+                Point check = Point.add(p, Point.mult(dir, i));
+                if(check.x < 4 ||check.x > 8 || check.y < 4 || check.y > 8)
+                    continue;
+                if(getValueAtPoint(check) == val)
+                {
+                    line.Add(check);
+                    same++;
+                }
+                else
+                    break;
+            }
+
+            if (same > 1) //If there are more than 1 of the same shape in the direction then we know it is a match
+            {
+                AddPoints(ref connected, line); //Add these points to the overarching connected list
+                comboList.Add(line);
+            }
+                
+        }
+
+        for(int i = 0; i < 2; i++) //Checking if we are in the middle of two of the same shapes
+        {
+            List<Point> line = new List<Point>();
+
+            int same = 0;
+            line.Add(p);
+            Point[] check = { Point.add(p, directions[i]), Point.add(p, directions[i + 2]) };
+            
+            foreach (Point next in check) //Check both sides of the piece, if they are the same value, add them to the list
+            {
+                if(next.x < 4 ||next.x > 8 || next.y < 4 || next.y > 8)
+                    continue;
+                if (getValueAtPoint(next) == val)
+                {
+                    line.Add(next);
+                    same++;
                 }
             }
+
+            if (same > 1)
+            {
+                AddPoints(ref connected, line); //Add these points to the overarching connected list
+                comboList.Add(line);
+            }
+        }
+        if(main) //Checks for other matches along the current match
+        {
+            for (int i = 0; i < connected.Count; i++)
+                AddPoints(ref connected, isConnected(connected[i], false));
+        }
+        return connected;
+    }
+    
+    void AddPoints(ref List<Point> points, List<Point> add)
+    {
+        foreach(Point p in add)
+        {
+            bool doAdd = true;
+            for(int i = 0; i < points.Count; i++)
+            {
+                if(points[i].Equals(p))
+                {
+                    doAdd = false;
+                    break;
+                }
+            }
+
+            if (doAdd) points.Add(p);
+        }
+    }
+    List<Point> forComboAddPoints(List<Point> points, List<Point> add)
+    {
+        foreach(Point p in add)
+        {
+            bool doAdd = true;
+            for(int i = 0; i < points.Count; i++)
+            {
+                if(points[i].Equals(p))
+                {
+                    doAdd = false;
+                    break;
+                }
+            }
+
+            if (doAdd) points.Add(p);
+        }
+        return points;
+    }
+
+    int fillPiece()
+    {
+        int val = 1;
+        val = (random.Next(0, 100) / (100 / pieces.Length)) + 1;
+        return val;
+    }
+
+    int getValueAtPoint(Point p)
+    {
+        if (p.x < 0 || p.x >= width || p.y < 0 || p.y >= height) return -1;
+        return board[p.x, p.y].value;
+    }
+    bool isContainPointInPointList(List<Point> list, Point p)
+    {
+        for(int i = 0 ; i < list.Count; i++)
+        {
+            if(list[i].x == p.x && list[i].y == p.y)
+                return true;
+        }
+        return false;
+    }
+    void setValueAtPoint(Point p, int v)
+    {
+        board[p.x, p.y].value = v;
+    }
+
+    int newValue(ref List<int> remove)
+    {
+        List<int> available = new List<int>();
+        for (int i = 0; i < pieces.Length; i++)
+            available.Add(i + 1);
+        foreach (int i in remove)
+            available.Remove(i);
+
+        if (available.Count <= 0) return 0;
+        return available[random.Next(0, available.Count)];
+    }
+
+    string getRandomSeed()
+    {
+        string seed = "";
+        string acceptableChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdeghijklmnopqrstuvwxyz1234567890!@#$%^&*()";
+        for (int i = 0; i < 20; i++)
+            seed += acceptableChars[Random.Range(0, acceptableChars.Length)];
+        return seed;
+    }
+    public void UpdateNodeData()
+    {
+        foreach(Node node in board)
+        {
+            if(node.getPiece()!=null)
+                node.value = node.getPiece().value;
         }
     }
     public void CopyBoard()
@@ -277,171 +557,15 @@ public class Match3 : MonoBehaviour
         }
     }
 
-    void InstantiateBoard()
-    {
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                Node node = getNodeAtPoint(new Point(x, y));
-
-                int val = node.value;
-                if (val <= 0) continue;
-                GameObject p = Instantiate(nodePiece, gameBoard);
-                NodePiece piece = p.GetComponent<NodePiece>();
-                RectTransform rect = p.GetComponent<RectTransform>();
-                rect.anchoredPosition = new Vector2(-224 + (64 * x), 224  - (64 * y));
-                piece.Initialize(val, new Point(x, y), pieces[val - 1]);
-                node.SetPiece(piece);
-            }
-        }
-    }
-     
-    // public void ResetPiece(NodePiece piece)  
-    // {
-    //     piece.ResetPosition();
-    //     update.Add(piece);
-    // }
-
-    
-    public void UpdateNodeData()
-    {
-        foreach(Node node in board)
-        {
-            if(node.getPiece()!=null)
-                node.value = node.getPiece().value;
-        }
-    }
-
-    List<Point> isConnected(Point p, bool main)
-    {
-        
-        List<Point> connected = new List<Point>();
-        int val = getValueAtPoint(p);
-        Point[] directions =
-        {
-            Point.up,
-            Point.right,
-            Point.down,
-            Point.left
-        };
-        
-        foreach(Point dir in directions) //Checking if there is 2 or more same shapes in the directions
-        {
-            List<Point> line = new List<Point>();
-            int same = 0;
-            for(int i = 1; i < 3; i++)
-            {
-                Point check = Point.add(p, Point.mult(dir, i));
-                if(check.x < 4 ||check.x > 8 || check.y < 4 || check.y > 8)
-                    continue;
-                if(getValueAtPoint(check) == val)
-                {
-                    line.Add(check);
-                    same++;
-                }
-            }
-
-            if (same > 1) //If there are more than 1 of the same shape in the direction then we know it is a match
-                AddPoints(ref connected, line); //Add these points to the overarching connected list
-        }
-
-        for(int i = 0; i < 2; i++) //Checking if we are in the middle of two of the same shapes
-        {
-            List<Point> line = new List<Point>();
-
-            int same = 0;
-            Point[] check = { Point.add(p, directions[i]), Point.add(p, directions[i + 2]) };
-            
-            foreach (Point next in check) //Check both sides of the piece, if they are the same value, add them to the list
-            {
-                if(next.x < 4 ||next.x > 8 || next.y < 4 || next.y > 8)
-                    continue;
-                if (getValueAtPoint(next) == val)
-                {
-                    line.Add(next);
-                    same++;
-                }
-            }
-
-            if (same > 1)
-                AddPoints(ref connected, line);
-        }
-        if(main) //Checks for other matches along the current match
-        {
-            for (int i = 0; i < connected.Count; i++)
-                AddPoints(ref connected, isConnected(connected[i], false));
-        }
-        return connected;
-    }
-    
-    void AddPoints(ref List<Point> points, List<Point> add)
-    {
-        foreach(Point p in add)
-        {
-            bool doAdd = true;
-            for(int i = 0; i < points.Count; i++)
-            {
-                if(points[i].Equals(p))
-                {
-                    doAdd = false;
-                    break;
-                }
-            }
-
-            if (doAdd) points.Add(p);
-        }
-    }
-
-    int fillPiece()
-    {
-        int val = 1;
-        val = (random.Next(0, 100) / (100 / pieces.Length)) + 1;
-        return val;
-    }
-
-    int getValueAtPoint(Point p)
-    {
-        if (p.x < 0 || p.x >= width || p.y < 0 || p.y >= height) return -1;
-        return board[p.x, p.y].value;
-    }
-
-    void setValueAtPoint(Point p, int v)
-    {
-        board[p.x, p.y].value = v;
-    }
-
-
-    int newValue(ref List<int> remove)
-    {
-        List<int> available = new List<int>();
-        for (int i = 0; i < pieces.Length; i++)
-            available.Add(i + 1);
-        foreach (int i in remove)
-            available.Remove(i);
-
-        if (available.Count <= 0) return 0;
-        return available[random.Next(0, available.Count)];
-    }
-
-    string getRandomSeed()
-    {
-        string seed = "";
-        string acceptableChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdeghijklmnopqrstuvwxyz1234567890!@#$%^&*()";
-        for (int i = 0; i < 20; i++)
-            seed += acceptableChars[Random.Range(0, acceptableChars.Length)];
-        return seed;
-    }
     public Node getNodeAtPoint(Point p)
     {
         return board[p.x, p.y];
     }
-
     public Vector2 getPositionFromPoint(Point p)
     {
         return new Vector2(-224 + (64 * p.x), 224 - (64 * p.y));
     }
-    public List<Node> GetNodesFromTheSameLineX(Point p)
+    public List<Node> getNodesFromTheSameLineX(Point p)
     {
         List<Node> line = new List<Node>();
         for(int x = 0; x < width; x++)
@@ -450,7 +574,7 @@ public class Match3 : MonoBehaviour
         }
         return line;
     }
-    public List<NodePiece> GetNodePiecesFromTheSameLineX(NodePiece piece)
+    public List<NodePiece> getNodePiecesFromTheSameLineX(NodePiece piece)
     {
         List<NodePiece> line = new List<NodePiece>();
         for(int x = 0; x < width; x++)
@@ -459,7 +583,7 @@ public class Match3 : MonoBehaviour
         }
         return line;
     }
-    public List<NodePiece> GetNodePiecesFromTheSameLineY(NodePiece piece)
+    public List<NodePiece> getNodePiecesFromTheSameLineY(NodePiece piece)
     {
         List<NodePiece> line = new List<NodePiece>();
         for(int y = 0; y < height; y++)

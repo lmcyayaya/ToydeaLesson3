@@ -35,6 +35,7 @@ public class StateManager : MonoBehaviour
         {
             case State.myTurn :
             {
+                
                 break;
             }
             case State.turning :

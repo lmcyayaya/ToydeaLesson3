@@ -165,7 +165,7 @@ public class MovePieces : MonoBehaviour
             {
                 case 1:
                 {
-                    moving = game.GetNodePiecesFromTheSameLineX(selectedPiece);
+                    moving = game.getNodePiecesFromTheSameLineX(selectedPiece);
                     foreach(NodePiece piece in moving)
                     {
                         Vector2 pos = Vector2.right * (int)((disX)/63) * 64;
@@ -177,7 +177,7 @@ public class MovePieces : MonoBehaviour
                     
                 case 2:
                 {
-                    moving = game.GetNodePiecesFromTheSameLineY(selectedPiece);
+                    moving = game.getNodePiecesFromTheSameLineY(selectedPiece);
                     foreach(NodePiece piece in moving)
                     {
                         Vector2 pos = Vector2.up * (int)((disY)/63) * 64;
