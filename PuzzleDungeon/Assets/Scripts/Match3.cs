@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Match3 : MonoBehaviour
 {
+    
     public ArrayLayout boardLayout;
 
     [Header("UI Elements")]
@@ -11,13 +12,14 @@ public class Match3 : MonoBehaviour
     public RectTransform gameBoard;
     [Header("Prefabs")]
     public GameObject nodePiece;
-    public int width = 13;
-    public int height = 13;
+    [HideInInspector]
+    public bool update;
+    int width = 13;
+    int height = 13;
     int[] fills;
     Node[,] board;
 
-    List<NodePiece> update;
-    List<FlippedPieces> flipped;
+    
     List<NodePiece> dead;
 
     System.Random random;
@@ -30,58 +32,34 @@ public class Match3 : MonoBehaviour
         StartGame();
     }
 
-    void Update()
+    public void Match3Update()
     {
-        List<NodePiece> finishedUpdating = new List<NodePiece>();
-        for(int i = 0; i < update.Count; i++)
+        
+        List<Point> connected = new List<Point>();
+        for(int x = 4; x < 9; x++)
         {
-            NodePiece piece = update[i];
-            if (!piece.UpdatePiece()) finishedUpdating.Add(piece);
+            for(int y = 4;y < 9; y++)
+            {
+                AddPoints(ref connected,isConnected(new Point(x,y),false));
+            }
         }
-        // for (int i = 0; i < finishedUpdating.Count; i++)
-        // {
-        //     NodePiece piece = finishedUpdating[i];
-        //     FlippedPieces flip = getFlipped(piece);
-        //     NodePiece flippedPiece = null;
-
-        //     int x = (int)piece.index.x;
-        //     fills[x] = Mathf.Clamp(fills[x] - 1, 0, width);
-
-        //     List<Point> connected = isConnected(piece.index, true);
-        //     bool wasFlipped = (flip != null);
-
-        //     if (wasFlipped) //If we flipped to make this update
-        //     {
-        //         flippedPiece = flip.getOtherPiece(piece);
-        //         AddPoints(ref connected, isConnected(flippedPiece.index, true));
-        //     }
-
-        //     if (connected.Count == 0) //If we didn't make a match
-        //     {
-        //         if (wasFlipped) //If we flipped
-        //             FlipPieces(piece.index, flippedPiece.index, false); //Flip back
-        //     }
-        //     else //If we made a match
-        //     {
-        //         foreach (Point pnt in connected) //Remove the node pieces connected
-        //         {
-        //             KillPiece(pnt);
-        //             Node node = getNodeAtPoint(pnt);
-        //             NodePiece nodePiece = node.getPiece();
-        //             if (nodePiece != null)
-        //             {
-        //                 nodePiece.gameObject.SetActive(false);
-        //                 dead.Add(nodePiece);
-        //             }
-        //             node.SetPiece(null);
-        //         }
-
-        //         ApplyGravityToBoard();
-        //     }
-
-        //     flipped.Remove(flip); //Remove the flip after update
-        //     update.Remove(piece);
-        // }
+        if(connected.Count == 0)
+        {
+            //沒對到東西要做的事在這
+        }
+        else
+        {
+            CheckConnectTypeAndAmount(connected);
+            foreach(Point p in connected)
+            {
+                Node node = getNodeAtPoint(p);
+                NodePiece nodePiece =node.getPiece();
+                if(nodePiece!=null)
+                    nodePiece.gameObject.SetActive(false);
+                node.SetPiece(null); 
+            }
+        }
+        StateManager.Instance.state = StateManager.State.dropping;
     }
 
     // public void ApplyGravityToBoard()
@@ -146,26 +124,13 @@ public class Match3 : MonoBehaviour
     //     }
     // }
 
-    // FlippedPieces getFlipped(NodePiece p)
-    // {
-    //     FlippedPieces flip = null;
-    //     for (int i = 0; i < flipped.Count; i++)
-    //     {
-    //         if (flipped[i].getOtherPiece(p) != null)
-    //         {
-    //             flip = flipped[i];
-    //             break;
-    //         }
-    //     }
-    //     return flip;
-    // }
 
     void StartGame()
     {
         fills = new int[width];
         string seed = getRandomSeed();
         random = new System.Random(seed.GetHashCode());
-        update = new List<NodePiece>();
+        //update = new List<NodePiece>();
         // flipped = new List<FlippedPieces>();
         // dead = new List<NodePiece>();
 
@@ -186,7 +151,41 @@ public class Match3 : MonoBehaviour
             }
         }
     }
-
+    void CheckConnectTypeAndAmount(List<Point> connected)
+    {
+        int atk = 0;
+        int move = 0 ;
+        int def = 0;
+        int sp = 0;
+        foreach(Point p in connected)
+        {
+            switch(getValueAtPoint(p))
+            {
+                case 1 :
+                {
+                    atk += 1;
+                    break;
+                }
+                case 2 :
+                {
+                    move += 1;
+                    break;
+                }
+                case 3 :
+                {
+                    def += 1;
+                    break;
+                }
+                case 4 :
+                {
+                    sp += 1;
+                    break;
+                }
+                
+            }
+        }
+        Debug.Log("Cube有"+atk+"個,"+"cylinder有"+move+"個,"+"prymid有"+def+"個,"+"sphere有"+sp+"個,");
+    }
     void VerifyBoard()
     {
         List<int> remove;
@@ -298,34 +297,13 @@ public class Match3 : MonoBehaviour
         }
     }
      
-    public void ResetPiece(NodePiece piece)
-    {
-        piece.ResetPosition();
-        update.Add(piece);
-    }
+    // public void ResetPiece(NodePiece piece)  
+    // {
+    //     piece.ResetPosition();
+    //     update.Add(piece);
+    // }
 
-    public void FlipPieces(Point one, Point two, bool main)
-    {
-        if (getValueAtPoint(one) < 0) return;
-
-        Node nodeOne = getNodeAtPoint(one);
-        NodePiece pieceOne = nodeOne.getPiece();
-        if (getValueAtPoint(two) > 0)
-        {
-            Node nodeTwo = getNodeAtPoint(two);
-            NodePiece pieceTwo = nodeTwo.getPiece();
-            nodeOne.SetPiece(pieceTwo);
-            nodeTwo.SetPiece(pieceOne);
-
-            if(main)
-                flipped.Add(new FlippedPieces(pieceOne, pieceTwo));
-
-            update.Add(pieceOne);
-            update.Add(pieceTwo);
-        }
-        else
-            ResetPiece(pieceOne);
-    }
+    
     public void UpdateNodeData()
     {
         foreach(Node node in board)
@@ -334,35 +312,10 @@ public class Match3 : MonoBehaviour
                 node.value = node.getPiece().value;
         }
     }
-    // public void SwipePieces(List<Node> pieces,int moveAmount)
-    // {
-    //     switch(moveAmount)
-    //     {
-    //         case 1:
-    //         break;
-    //         case 2:
-    //         break;
-    //         case 3:
-    //         break;
-    //         case 4:
-    //         {   
-    //             for(int i = 8; i > 3; i--)
-    //             {
-    //                 Node origin = pieces[i];
-    //                 NodePiece originPiece = origin.getPiece();
-    //                 Node copy = pieces[moveAmount];
-    //                 origin.value = copy.value;
-    //                 originPiece.value = copy.value;
 
-    //                 moveAmount--;
-    //             }
-    //         }
-                
-    //         break;
-    //     }
-    // }
     List<Point> isConnected(Point p, bool main)
     {
+        
         List<Point> connected = new List<Point>();
         int val = getValueAtPoint(p);
         Point[] directions =
@@ -376,11 +329,12 @@ public class Match3 : MonoBehaviour
         foreach(Point dir in directions) //Checking if there is 2 or more same shapes in the directions
         {
             List<Point> line = new List<Point>();
-
             int same = 0;
             for(int i = 1; i < 3; i++)
             {
                 Point check = Point.add(p, Point.mult(dir, i));
+                if(check.x < 4 ||check.x > 8 || check.y < 4 || check.y > 8)
+                    continue;
                 if(getValueAtPoint(check) == val)
                 {
                     line.Add(check);
@@ -398,8 +352,11 @@ public class Match3 : MonoBehaviour
 
             int same = 0;
             Point[] check = { Point.add(p, directions[i]), Point.add(p, directions[i + 2]) };
+            
             foreach (Point next in check) //Check both sides of the piece, if they are the same value, add them to the list
             {
+                if(next.x < 4 ||next.x > 8 || next.y < 4 || next.y > 8)
+                    continue;
                 if (getValueAtPoint(next) == val)
                 {
                     line.Add(next);
@@ -410,30 +367,6 @@ public class Match3 : MonoBehaviour
             if (same > 1)
                 AddPoints(ref connected, line);
         }
-
-        for(int i = 0; i < 4; i++) //Check for a 2x2
-        {
-            List<Point> square = new List<Point>();
-
-            int same = 0;
-            int next = i + 1;
-            if (next >= 4)
-                next -= 4;
-
-            Point[] check = { Point.add(p, directions[i]), Point.add(p, directions[next]), Point.add(p, Point.add(directions[i], directions[next])) };
-            foreach (Point pnt in check) //Check all sides of the piece, if they are the same value, add them to the list
-            {
-                if (getValueAtPoint(pnt) == val)
-                {
-                    square.Add(pnt);
-                    same++;
-                }
-            }
-
-            if (same > 2)
-                AddPoints(ref connected, square);
-        }
-
         if(main) //Checks for other matches along the current match
         {
             for (int i = 0; i < connected.Count; i++)
@@ -565,24 +498,3 @@ public class Node
     }
 }
 
-[System.Serializable]
-public class FlippedPieces
-{
-    public NodePiece one;
-    public NodePiece two;
-
-    public FlippedPieces(NodePiece o, NodePiece t)
-    {
-        one = o; two = t;
-    }
-
-    public NodePiece getOtherPiece(NodePiece p)
-    {
-        if (p == one)
-            return two;
-        else if (p == two)
-            return one;
-        else
-            return null;
-    }
-}

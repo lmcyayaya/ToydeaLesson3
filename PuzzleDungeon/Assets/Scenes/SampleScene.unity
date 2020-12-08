@@ -480,12 +480,10 @@ MonoBehaviour:
   - {fileID: 21300004, guid: 34f6321b206afab459fb7c8d37989456, type: 3}
   - {fileID: 21300006, guid: 34f6321b206afab459fb7c8d37989456, type: 3}
   - {fileID: 21300000, guid: 34f6321b206afab459fb7c8d37989456, type: 3}
-  - {fileID: 21300000, guid: 2c97df9695607b04c92ec362851a0890, type: 3}
   gameBoard: {fileID: 2091783654}
   nodePiece: {fileID: 2648329859546268978, guid: f031a3b26511980489825b7313fcf470,
     type: 3}
-  width: 13
-  height: 13
+  update: 0
 --- !u!4 &778426883
 Transform:
   m_ObjectHideFlags: 0

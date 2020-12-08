@@ -197,15 +197,25 @@ public class MovePieces : MonoBehaviour
         selectedPiece = piece;
         mouseStart = Input.mousePosition;
         startPos = piece.rect.anchoredPosition;
+        StateManager.Instance.state = StateManager.State.turning;
     }
 
     public void DropPiece()
     {
-        if (selectedPiece == null ) return;
+        if (selectedPiece == null ) 
+        {
+            StateManager.Instance.state = StateManager.State.matching;
+            return;
+        }
         
         selectedPiece = null;
 
-        if (moving == null || moveAmount == 0) return;
+        if (moving == null || moveAmount == 0)
+        {
+            StateManager.Instance.state = StateManager.State.matching;
+            return;
+        }
+        
 
         if(moveAmount > 0)
         {
@@ -237,11 +247,6 @@ public class MovePieces : MonoBehaviour
         game.UpdateNodeData();
         game.CopyBoard();
         moving = null;
-        
-    }
-    void CheckIndex(int i)
-    {
-        
-
+        StateManager.Instance.state = StateManager.State.matching;
     }
 }

@@ -55,23 +55,6 @@ public class NodePiece : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         rect.anchoredPosition = Vector2.Lerp(rect.anchoredPosition, move, Time.deltaTime * 16f);
     }
     
-
-    public bool UpdatePiece()
-    {
-        if(Vector3.Distance(rect.anchoredPosition, pos) > 1)
-        {
-            MovePositionTo(pos);
-            updating = true;
-            return true;
-        }
-        else
-        {
-            rect.anchoredPosition = pos;
-            updating = false;
-            return false;
-        }
-    }
-
     void UpdateName()
     {
         transform.name = "Node [" + index.x + ", " + index.y + "]";
@@ -79,15 +62,15 @@ public class NodePiece : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (updating) return;
+        if(StateManager.Instance.state != StateManager.State.myTurn)
+            return;
         MovePieces.Instance.MovePiece(this);
-        Debug.Log("CLick");
-        
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-       if (updating) return;
+        if(StateManager.Instance.state != StateManager.State.turning)
+            return;
        MovePieces.Instance.DropPiece();
     }
 }
