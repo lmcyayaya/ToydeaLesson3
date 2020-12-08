@@ -33,11 +33,18 @@ public class NodePiece : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         ResetPosition();
         UpdateName();
     }
+    public void RestSprite(Sprite piece)
+    {
+        img.sprite = piece;
+    }
     public void ResetPosition()
     {
-        pos = new Vector2(-288 + (64 * index.x), 288 - (64 * index.y));
+        pos = new Vector2(-224 + (64 * index.x), 224 - (64 * index.y));
     }
-
+    public void MovePositionBack()
+    {
+        rect.anchoredPosition = pos;
+    }
     public void MovePosition(Vector2 move)
     {
         rect.anchoredPosition += move * Time.deltaTime * 16f;

@@ -11,10 +11,8 @@ public class Match3 : MonoBehaviour
     public RectTransform gameBoard;
     [Header("Prefabs")]
     public GameObject nodePiece;
-    [HideInInspector]
-    public int width = 15;
-    [HideInInspector]
-    public int height = 15;
+    public int width = 13;
+    public int height = 13;
     int[] fills;
     Node[,] board;
 
@@ -34,7 +32,56 @@ public class Match3 : MonoBehaviour
 
     void Update()
     {
-        
+        List<NodePiece> finishedUpdating = new List<NodePiece>();
+        for(int i = 0; i < update.Count; i++)
+        {
+            NodePiece piece = update[i];
+            if (!piece.UpdatePiece()) finishedUpdating.Add(piece);
+        }
+        // for (int i = 0; i < finishedUpdating.Count; i++)
+        // {
+        //     NodePiece piece = finishedUpdating[i];
+        //     FlippedPieces flip = getFlipped(piece);
+        //     NodePiece flippedPiece = null;
+
+        //     int x = (int)piece.index.x;
+        //     fills[x] = Mathf.Clamp(fills[x] - 1, 0, width);
+
+        //     List<Point> connected = isConnected(piece.index, true);
+        //     bool wasFlipped = (flip != null);
+
+        //     if (wasFlipped) //If we flipped to make this update
+        //     {
+        //         flippedPiece = flip.getOtherPiece(piece);
+        //         AddPoints(ref connected, isConnected(flippedPiece.index, true));
+        //     }
+
+        //     if (connected.Count == 0) //If we didn't make a match
+        //     {
+        //         if (wasFlipped) //If we flipped
+        //             FlipPieces(piece.index, flippedPiece.index, false); //Flip back
+        //     }
+        //     else //If we made a match
+        //     {
+        //         foreach (Point pnt in connected) //Remove the node pieces connected
+        //         {
+        //             KillPiece(pnt);
+        //             Node node = getNodeAtPoint(pnt);
+        //             NodePiece nodePiece = node.getPiece();
+        //             if (nodePiece != null)
+        //             {
+        //                 nodePiece.gameObject.SetActive(false);
+        //                 dead.Add(nodePiece);
+        //             }
+        //             node.SetPiece(null);
+        //         }
+
+        //         ApplyGravityToBoard();
+        //     }
+
+        //     flipped.Remove(flip); //Remove the flip after update
+        //     update.Remove(piece);
+        // }
     }
 
     // public void ApplyGravityToBoard()
@@ -124,9 +171,8 @@ public class Match3 : MonoBehaviour
 
         InitializeBoard();
         VerifyBoard();
-        CopyBoard();
         InstantiateBoard();
-        
+        CopyBoard();
     }
 
     void InitializeBoard()
@@ -144,9 +190,9 @@ public class Match3 : MonoBehaviour
     void VerifyBoard()
     {
         List<int> remove;
-        for (int x = 5; x < width; x++)
+        for (int x = 4; x < 9; x++)
         {
-            for (int y = 5; y < height; y++)
+            for (int y = 4; y < 9; y++)
             {
                 Point p = new Point(x, y);
                 int val = getValueAtPoint(p);
@@ -163,12 +209,12 @@ public class Match3 : MonoBehaviour
             }
         }
     }
-    void CopyBoard()
+    public void CopyBoard()
     {
         //左邊複製
-        for(int x = 0; x < 5;x++)
+        for(int x = 0; x < 4;x++)
         {
-            for(int y = 5; y < 10; y++)
+            for(int y = 4; y < 9; y++)
             {
                 Point p = new Point(x,y);
                 Point bordP = new Point(x+5,y);
@@ -176,13 +222,16 @@ public class Match3 : MonoBehaviour
                 if(val <=0 ) continue;
 
                 setValueAtPoint(p,val);
+                Node node = getNodeAtPoint(p);
+                node.getPiece().value = val;
+                node.getPiece().RestSprite(pieces[val-1]);
 
             }
         }
         //上面複製
-        for(int x = 5; x < 10;x++)
+        for(int x = 4; x < 9;x++)
         {
-            for(int y = 0; y < 5; y++)
+            for(int y = 0; y < 4; y++)
             {
                 Point p = new Point(x,y);
                 Point bordP = new Point(x,y+5);
@@ -190,12 +239,15 @@ public class Match3 : MonoBehaviour
                 if(val <=0 ) continue;
 
                 setValueAtPoint(p,val);
+                Node node = getNodeAtPoint(p);
+                node.getPiece().value = val;
+                node.getPiece().RestSprite(pieces[val-1]);
             }
         }
         //右邊
-        for(int x = 10; x < width;x++)
+        for(int x = 9; x < width;x++)
         {
-            for(int y = 5; y < 10; y++)
+            for(int y = 4; y < 9; y++)
             {
                 Point p = new Point(x,y);
                 Point bordP = new Point(x-5,y);
@@ -203,12 +255,15 @@ public class Match3 : MonoBehaviour
                 if(val <=0 ) continue;
 
                 setValueAtPoint(p,val);
+                Node node = getNodeAtPoint(p);
+                node.getPiece().value = val;
+                node.getPiece().RestSprite(pieces[val-1]);
             }
         }
         //下面
-        for(int x = 5; x < 10;x++)
+        for(int x = 4; x < 9;x++)
         {
-            for(int y = 10; y < height; y++)
+            for(int y = 9; y < height; y++)
             {   
                 Point p = new Point(x,y);
                 Point bordP = new Point(x,y-5);
@@ -216,6 +271,9 @@ public class Match3 : MonoBehaviour
                 if(val <=0 ) continue;
 
                 setValueAtPoint(p,val);
+                Node node = getNodeAtPoint(p);
+                node.getPiece().value = val;
+                node.getPiece().RestSprite(pieces[val-1]);
             }
         }
     }
@@ -233,7 +291,7 @@ public class Match3 : MonoBehaviour
                 GameObject p = Instantiate(nodePiece, gameBoard);
                 NodePiece piece = p.GetComponent<NodePiece>();
                 RectTransform rect = p.GetComponent<RectTransform>();
-                rect.anchoredPosition = new Vector2(-288 + (64 * x), 288  - (64 * y));
+                rect.anchoredPosition = new Vector2(-224 + (64 * x), 224  - (64 * y));
                 piece.Initialize(val, new Point(x, y), pieces[val - 1]);
                 node.SetPiece(piece);
             }
@@ -246,29 +304,63 @@ public class Match3 : MonoBehaviour
         update.Add(piece);
     }
 
-    // public void FlipPieces(Point one, Point two, bool main)
+    public void FlipPieces(Point one, Point two, bool main)
+    {
+        if (getValueAtPoint(one) < 0) return;
+
+        Node nodeOne = getNodeAtPoint(one);
+        NodePiece pieceOne = nodeOne.getPiece();
+        if (getValueAtPoint(two) > 0)
+        {
+            Node nodeTwo = getNodeAtPoint(two);
+            NodePiece pieceTwo = nodeTwo.getPiece();
+            nodeOne.SetPiece(pieceTwo);
+            nodeTwo.SetPiece(pieceOne);
+
+            if(main)
+                flipped.Add(new FlippedPieces(pieceOne, pieceTwo));
+
+            update.Add(pieceOne);
+            update.Add(pieceTwo);
+        }
+        else
+            ResetPiece(pieceOne);
+    }
+    public void UpdateNodeData()
+    {
+        foreach(Node node in board)
+        {
+            if(node.getPiece()!=null)
+                node.value = node.getPiece().value;
+        }
+    }
+    // public void SwipePieces(List<Node> pieces,int moveAmount)
     // {
-    //     if (getValueAtPoint(one) < 0) return;
-
-    //     Node nodeOne = getNodeAtPoint(one);
-    //     NodePiece pieceOne = nodeOne.getPiece();
-    //     if (getValueAtPoint(two) > 0)
+    //     switch(moveAmount)
     //     {
-    //         Node nodeTwo = getNodeAtPoint(two);
-    //         NodePiece pieceTwo = nodeTwo.getPiece();
-    //         nodeOne.SetPiece(pieceTwo);
-    //         nodeTwo.SetPiece(pieceOne);
+    //         case 1:
+    //         break;
+    //         case 2:
+    //         break;
+    //         case 3:
+    //         break;
+    //         case 4:
+    //         {   
+    //             for(int i = 8; i > 3; i--)
+    //             {
+    //                 Node origin = pieces[i];
+    //                 NodePiece originPiece = origin.getPiece();
+    //                 Node copy = pieces[moveAmount];
+    //                 origin.value = copy.value;
+    //                 originPiece.value = copy.value;
 
-    //         if(main)
-    //             flipped.Add(new FlippedPieces(pieceOne, pieceTwo));
-
-    //         update.Add(pieceOne);
-    //         update.Add(pieceTwo);
+    //                 moveAmount--;
+    //             }
+    //         }
+                
+    //         break;
     //     }
-    //     else
-    //         ResetPiece(pieceOne);
     // }
-
     List<Point> isConnected(Point p, bool main)
     {
         List<Point> connected = new List<Point>();
@@ -414,7 +506,16 @@ public class Match3 : MonoBehaviour
 
     public Vector2 getPositionFromPoint(Point p)
     {
-        return new Vector2(-288 + (64 * p.x), 288 - (64 * p.y));
+        return new Vector2(-224 + (64 * p.x), 224 - (64 * p.y));
+    }
+    public List<Node> GetNodesFromTheSameLineX(Point p)
+    {
+        List<Node> line = new List<Node>();
+        for(int x = 0; x < width; x++)
+        {
+            line.Add(getNodeAtPoint(new Point(x,p.y)));
+        }
+        return line;
     }
     public List<NodePiece> GetNodePiecesFromTheSameLineX(NodePiece piece)
     {

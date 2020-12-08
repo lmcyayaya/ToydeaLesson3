@@ -19,6 +19,8 @@ public class MovePieces : MonoBehaviour
     Point newIndex;
     Vector2 startPos;
     Vector2 mouseStart;
+    //移動個數
+    int moveAmount;
     int cDir = 0;
 
     private void Awake()
@@ -41,72 +43,124 @@ public class MovePieces : MonoBehaviour
 
             //因為珠子的錨點在左上角所以要減去盤面的一半
             float disX = nPos.x + rect.sizeDelta.x/2 - startPos.x;
-            float disY = nPos.y - rect.sizeDelta.x/2 - startPos.y;
+            float disY = nPos.y - rect.sizeDelta.y/2 - startPos.y;
             Vector2 dir = ((Vector2)Input.mousePosition - mouseStart);
             Vector2 nDir = dir.normalized;
             Vector2 aDir = new Vector2(Mathf.Abs(dir.x), Mathf.Abs(dir.y));
-            if (dir.magnitude > 1 && cDir == 0) 
+            if (dir.magnitude > 32 && cDir == 0) 
             {
-                
                 if (aDir.x > aDir.y)
                     cDir = 1;
                 else if(aDir.y > aDir.x)
                     cDir = 2;
             }
-            else if(dir.magnitude < 0)
+            else if(dir.magnitude < 32)
                 cDir = 0;
-            Debug.Log((int)((disX+32)/64)+"個");
 
+            //避免拉超過盤面 每個位置上的珠子都只能拉到最旁邊為止
             switch(selectedPiece.index.x)
             {
-                case 5:
+                case 4:
                 {
-                    if(disX > 64 * ((game.width / 3) - 0.5f))
-                        disX = 64 * ((game.width / 3) - 0.5f);
-                    else if(disX < -32)
-                        disX = -32;
+                    if(disX > 64 * 4)
+                        disX = 64 * 4;
+                    else if(disX < 0)
+                        disX = 0;
                     break;
                 }
                     
+                case 5:
+                {
+                    if(disX > 64 * 3)
+                        disX = 64 * 3;
+                    else if(disX < -64 * 1)
+                        disX = -64 * 1;
+
+                    break;
+                }
+                
                 case 6:
                 {
-                    if(disX > 64 * ((game.width/3) - 1 - 0.5f))
-                        disX = 64 * ((game.width/3) - 1 - 0.5f);
-                    else if(disX < -64 * ((game.width/3) - 3 - 0.5f))
-                        disX = -64 * ((game.width/3) - 3 - 0.5f);
-
+                    if(disX > 64 * 2)
+                        disX = 64 * 2;
+                    else if(disX < -64 * 2)
+                        disX = -64 * 2;
                     break;
                 }
                 
                 case 7:
                 {
-                    if(disX > 64 * ((game.width/3) - 2 - 0.5f))
-                        disX = 64 * ((game.width/3) - 2 - 0.5f);
-                    else if(disX < -64 * ((game.width/3) - 2 - 0.5f))
-                        disX = -64 * ((game.width/3) - 2 - 0.5f);
-                    break;
+                    if(disX > 64 * 1)
+                        disX = 64 * 1;
+                    else if(disX < -64 * 3)
+                        disX = -64 * 3;
+                   break; 
                 }
                 
                 case 8:
                 {
-                    if(disX > 64 * ((game.width/3) - 4 - 0.5f))
-                        disX = 64 * ((game.width/3) - 4 - 0.5f);
-                    else if(disX < -64 * ((game.width/3) - 1 - 0.5f))
-                        disX = -64 * ((game.width/3) - 1 - 0.5f);
-                   break; 
-                }
-                
-                case 9:
+                    if(disX > 0)
+                        disX = 0;
+                    else if(disX < -64 * 4)
+                        disX = -64 * 4;
+                    break;
+                }     
+            }
+
+            switch(selectedPiece.index.y)
+            {
+                case 4:
                 {
-                    if(disX > 32)
-                        disX = 32;
-                    else if(disX < -64 * ((game.width / 3) - 0.5f))
-                        disX = -64 * ((game.width / 3) - 0.5f);
+                    if(disY > 0)
+                        disY = 0;
+                    else if(disY < -64 * 4)
+                        disY = -64 * 4;
                     break;
                 }
                     
+                case 5:
+                {
+                    if(disY > 64 * 1)
+                        disY = 64 * 1;
+                    else if(disY < -64 * 3)
+                        disY = -64 * 3;
+                    break;
+                }
+                
+                case 6:
+                {
+                     if(disY > 64 * 2)
+                        disY = 64 * 2;
+                    else if(disY < -64 * 2)
+                        disY = -64 * 2;
+                    break;
+                }
+                
+                case 7:
+                {
+                     if(disY > 64 * 3)
+                        disY = 64 * 3;
+                    else if(disY < -64 * 1)
+                        disY = -64 * 1;
+                   break; 
+                }
+                
+                case 8:
+                {
+                    if(disY > 64 * 4)
+                        disY = 64 * 4;
+                    else if(disY < 0)
+                        disY = 0;
+                    break;
+                }     
             }
 
+            if(disX > 0 )
+                disX = disX + 32;
+            else if(disX < 0)
+                disX = disX -32;
+
+            //Debug.Log((int)((disX)/63)+"個");
             switch(cDir)
             {
                 case 1:
@@ -114,7 +168,8 @@ public class MovePieces : MonoBehaviour
                     moving = game.GetNodePiecesFromTheSameLineX(selectedPiece);
                     foreach(NodePiece piece in moving)
                     {
-                        Vector2 pos = Vector2.right * disX;
+                        Vector2 pos = Vector2.right * (int)((disX)/63) * 64;
+                        moveAmount = (int)((disX)/63);
                         piece.MovePositionTo(game.getPositionFromPoint(piece.index)+pos);
                     }
                     break;
@@ -125,15 +180,13 @@ public class MovePieces : MonoBehaviour
                     moving = game.GetNodePiecesFromTheSameLineY(selectedPiece);
                     foreach(NodePiece piece in moving)
                     {
-                        Vector2 pos = Vector2.up * disY;
+                        Vector2 pos = Vector2.up * (int)((disY)/63) * 64;
+                        moveAmount = -(int)((disY)/63);
                         piece.MovePositionTo(game.getPositionFromPoint(piece.index)+pos);
                     }
                     break;
                 }  
             }
-            
-            
-
         }
     }
 
@@ -148,9 +201,43 @@ public class MovePieces : MonoBehaviour
 
     public void DropPiece()
     {
-        if (selectedPiece == null) return;
-        cDir = 0;
+        if (selectedPiece == null ) return;
+        
         selectedPiece = null;
+
+        if (moving == null || moveAmount == 0) return;
+
+        if(moveAmount > 0)
+        {
+            int j = 8-moveAmount;
+            for(int i = 8; i > 3; i--)
+            {
+                moving[i].value = moving[j].value;
+                moving[i].RestSprite(game.pieces[moving[i].value-1]);
+                j--;
+            }
+        }
+        else if(moveAmount < 0)
+        {
+            int j = 4-moveAmount;
+            for(int i = 4; i < 9; i++)
+            {
+                moving[i].value = moving[j].value;
+                moving[i].RestSprite(game.pieces[moving[i].value-1]);
+                j++;
+            }
+        }
+
+
+        foreach(NodePiece piece in moving)
+        {
+            piece.MovePositionBack();
+        }
+        cDir = 0;
+        game.UpdateNodeData();
+        game.CopyBoard();
+        moving = null;
+        
     }
     void CheckIndex(int i)
     {
