@@ -14,7 +14,7 @@ public class StateManager : MonoBehaviour
     static StateManager instance;
     public enum State
     {
-        myTurn,turning,matching,dropping,enemyTurn
+        myTurn,turning,matching,dropping,action,enemyTurn
     }
     public State state;
     Match3 game;
@@ -29,17 +29,17 @@ public class StateManager : MonoBehaviour
     }
 
 
-    void Update()
+    void FixedUpdate()
     {
         switch(state)
         {
             case State.myTurn :
             {
-                
                 break;
             }
             case State.turning :
             {
+                game.TurningUpdate();
                 break;
             }
             case State.matching :

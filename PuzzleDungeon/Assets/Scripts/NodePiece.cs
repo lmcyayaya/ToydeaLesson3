@@ -73,9 +73,8 @@ public class NodePiece : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if(StateManager.Instance.state != StateManager.State.myTurn)
-            return;
-        MovePieces.Instance.MovePiece(this);
+        if(StateManager.Instance.state == StateManager.State.myTurn || StateManager.Instance.state == StateManager.State.turning )
+            MovePieces.Instance.MovePiece(this);
     }
 
     public void OnPointerUp(PointerEventData eventData)

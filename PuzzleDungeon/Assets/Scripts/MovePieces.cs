@@ -169,8 +169,16 @@ public class MovePieces : MonoBehaviour
                 disX = disX + 32;
             else if(disX < 0)
                 disX = disX -32;
+            
+            if(disY > 0 )
+                disY = disY + 32;
+            else if(disY < 0)
+                disY = disY -32;
 
-            //
+            if(Mathf.Abs((int)((disX)/63)) > 0 || Mathf.Abs((int)((disY)/63)) > 0)
+                StateManager.Instance.state = StateManager.State.turning;
+
+
             switch(cDir)
             {
                 case 1:
@@ -180,7 +188,7 @@ public class MovePieces : MonoBehaviour
                     {
                         Vector2 pos = Vector2.right * (int)((disX)/63) * 64;
                         moveAmount = (int)((disX)/63);
-                        piece.MovePositionTo(game.getPositionFromPoint(piece.index)+pos,20f);
+                        piece.MovePositionTo(game.getPositionFromPoint(piece.index)+pos,30f);
                     }
                     break;
                 }
@@ -207,14 +215,13 @@ public class MovePieces : MonoBehaviour
         selectedPiece = piece;
         mouseStart = Input.mousePosition;
         startPos = piece.rect.anchoredPosition;
-        StateManager.Instance.state = StateManager.State.turning;
     }
 
     public void DropPiece()
     {
         if (selectedPiece == null ) 
         {
-            StateManager.Instance.state = StateManager.State.matching;
+            //StateManager.Instance.state = StateManager.State.matching;
             return;
         }
         
@@ -222,7 +229,7 @@ public class MovePieces : MonoBehaviour
 
         if (moving == null || moveAmount == 0)
         {
-            StateManager.Instance.state = StateManager.State.matching;
+            //StateManager.Instance.state = StateManager.State.matching;
             return;
         }
         
@@ -257,6 +264,5 @@ public class MovePieces : MonoBehaviour
         game.UpdateNodeData();
         game.CopyBoard();
         moving = null;
-        StateManager.Instance.state = StateManager.State.matching;
     }
 }

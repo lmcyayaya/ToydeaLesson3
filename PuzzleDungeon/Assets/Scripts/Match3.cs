@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Match3 : MonoBehaviour
 {
@@ -12,7 +13,9 @@ public class Match3 : MonoBehaviour
     public RectTransform gameBoard;
     [Header("Prefabs")]
     public GameObject nodePiece;
-    [HideInInspector]
+    public Image timeLine;
+    public float turningTime; 
+    float time;
     int width = 13;
     int height = 13;
     int[] fills;
@@ -23,13 +26,23 @@ public class Match3 : MonoBehaviour
     List<NodePiece> dead;
     List<NodePiece> update;
     System.Random random;
-    void Awake()
-    {
-    }
 
     void Start()
     {
         StartGame();
+    }
+    public void TurningUpdate()
+    {
+        timeLine.fillAmount = time / turningTime;
+        if(time <= 0 )
+        {
+            
+            MovePieces.Instance.DropPiece();
+            ResetAllPiecePosNow();
+            StateManager.Instance.state = StateManager.State.matching;
+        } 
+        else
+            time -= Time.deltaTime;
     }
     public void DroppingUpdate()
     {
@@ -56,9 +69,9 @@ public class Match3 : MonoBehaviour
             return;
         List<Point> connected = new List<Point>();
         comboList.Clear();
-        for(int x = 4; x < 9; x++)
+        for(int y = 4;y < 9; y++)
         {
-            for(int y = 4;y < 9; y++)
+            for(int x = 4; x < 9; x++)
             {
                 if(!isContainPointInPointList(connected,new Point(x,y)))
                     AddPoints(ref connected,isConnected(new Point(x,y),false));
@@ -71,6 +84,7 @@ public class Match3 : MonoBehaviour
             //If do not match anything do something here
             CopyBoard();
             StateManager.Instance.state = StateManager.State.enemyTurn;
+            time = turningTime;
             return;
         }
         else
@@ -82,97 +96,6 @@ public class Match3 : MonoBehaviour
             StartCoroutine(ClearCombo());
         }
     }
-    IEnumerator ClearCombo()
-    {
-        clearing = true;
-        foreach(List<Point> pointList in comboList)
-        {
-            foreach(Point p in pointList)
-            {
-                Node node = getNodeAtPoint(p);
-                NodePiece nodePiece =node.getPiece();
-                if(nodePiece!=null)
-                {
-                    nodePiece.gameObject.SetActive(false);
-                    dead.Add(nodePiece);
-                }
-                node.SetPiece(null); 
-            }
-            if(comboList.IndexOf(pointList)==comboList.Count-1)
-                yield return null;
-            else
-                yield return new WaitForSeconds(0.2f);
-        }
-        clearing = false;
-        ApplyGravityToBoard();
-        StateManager.Instance.state = StateManager.State.dropping;
-    }
-
-    void ApplyGravityToBoard()
-    {
-        for (int x = 4; x < 9; x++)
-        {
-            for (int y = 8 ; y > 3; y--) //Start at the bottom and grab the next
-            {
-                Point p = new Point(x, y);
-                Node node = getNodeAtPoint(p);
-                int val = getValueAtPoint(p);
-                if (val != 0) continue; //If not a hole, move to the next
-
-                for(int ny = (y-1); ny >= 3 ; ny--)
-                {
-                    Point next = new Point(x, ny);
-                    int nextVal = getValueAtPoint(next);
-                    if(nextVal == 0)
-                        continue;
-
-                    if(nextVal != -1)
-                    {
-                        Node got = getNodeAtPoint(next);
-                        NodePiece piece = got.getPiece();
-
-                        //Set the hole
-                        node.SetPiece(piece);
-                        update.Add(piece);
-
-                        //Replace the hole
-                        got.SetPiece(null);
-                    }
-                    else //hit an end
-                    {
-                        //Fill in the hole
-                        int newVal = fillPiece();
-                        NodePiece piece;
-                        Point fallPoint = new Point(x,3);
-                        if(dead.Count > 0)
-                        {
-                            NodePiece revived = dead[0];
-                            revived.gameObject.SetActive(true);
-                            revived.rect.anchoredPosition = getPositionFromPoint(fallPoint);
-                            piece = revived;
-                            
-
-
-                            dead.RemoveAt(0);
-                        }
-                        else
-                        {
-                            GameObject obj = Instantiate(nodePiece, gameBoard);
-                            NodePiece n =obj.GetComponent<NodePiece>();
-                            RectTransform rect = obj.GetComponent<RectTransform>();
-                            rect.anchoredPosition = getPositionFromPoint(fallPoint);
-                            piece = n;
-                        }
-                        piece.Initialize(newVal, p, pieces[newVal - 1]);
-                        Node hole = getNodeAtPoint(p);
-                        hole.SetPiece(piece);
-                        ResetPiece(piece);
-                    }
-                    break;
-                }
-            }
-        }
-    }
     void StartGame()
     {
         fills = new int[width];
@@ -181,6 +104,7 @@ public class Match3 : MonoBehaviour
         comboList = new List<List<Point>>();
         update = new List<NodePiece>();
         dead = new List<NodePiece>();
+        time = turningTime;
 
         InitializeBoard();
         VerifyBoard();
@@ -242,8 +166,9 @@ public class Match3 : MonoBehaviour
     void CheckConnectTypeAndAmount(List<Point> connected)
     {
         int atk = 0;
-        int move = 0 ;
         int def = 0;
+        int move = 0 ;
+        int hp = 0;
         int sp = 0;
 
         foreach(Point p in connected)
@@ -258,15 +183,20 @@ public class Match3 : MonoBehaviour
                 }
                 case 2 :
                 {
-                    move += 1;
+                    def += 1;
                     break;
                 }
                 case 3 :
                 {
-                    def += 1;
+                    move += 1;
                     break;
                 }
                 case 4 :
+                {
+                    hp += 1;
+                    break;
+                }
+                case 5 :
                 {
                     sp += 1;
                     break;
@@ -318,6 +248,31 @@ public class Match3 : MonoBehaviour
                 comboList.Remove(comboList[i]);
             }
         }
+    }
+    IEnumerator ClearCombo()
+    {
+        clearing = true;
+        foreach(List<Point> pointList in comboList)
+        {
+            foreach(Point p in pointList)
+            {
+                Node node = getNodeAtPoint(p);
+                NodePiece nodePiece =node.getPiece();
+                if(nodePiece!=null)
+                {
+                    nodePiece.gameObject.SetActive(false);
+                    dead.Add(nodePiece);
+                }
+                node.SetPiece(null); 
+            }
+            if(comboList.IndexOf(pointList)==comboList.Count-1)
+                yield return null;
+            else
+                yield return new WaitForSeconds(0.2f);
+        }
+        clearing = false;
+        ApplyGravityToBoard();
+        StateManager.Instance.state = StateManager.State.dropping;
     }
     List<Point> isConnected(Point p, bool main)
     {
@@ -391,11 +346,73 @@ public class Match3 : MonoBehaviour
             for (int i = 0; i < connected.Count; i++)
                 AddPoints(ref connected, isConnected(connected[i], false));
         }
-
-
         return connected;
     }
-    
+    void ApplyGravityToBoard()
+    {
+        for (int x = 4; x < 9; x++)
+        {
+            for (int y = 8 ; y > 3; y--) //Start at the bottom and grab the next
+            {
+                Point p = new Point(x, y);
+                Node node = getNodeAtPoint(p);
+                int val = getValueAtPoint(p);
+                if (val != 0) continue; //If not a hole, move to the next
+
+                for(int ny = (y-1); ny >= 3 ; ny--)
+                {
+                    Point next = new Point(x, ny);
+                    int nextVal = getValueAtPoint(next);
+                    if(nextVal == 0)
+                        continue;
+
+                    if(nextVal != -1)
+                    {
+                        Node got = getNodeAtPoint(next);
+                        NodePiece piece = got.getPiece();
+
+                        //Set the hole
+                        node.SetPiece(piece);
+                        update.Add(piece);
+
+                        //Replace the hole
+                        got.SetPiece(null);
+                    }
+                    else //hit an end
+                    {
+                        //Fill in the hole
+                        int newVal = fillPiece();
+                        NodePiece piece;
+                        Point fallPoint = new Point(x,3);
+                        if(dead.Count > 0)
+                        {
+                            NodePiece revived = dead[0];
+                            revived.gameObject.SetActive(true);
+                            revived.rect.anchoredPosition = getPositionFromPoint(fallPoint);
+                            piece = revived;
+                            
+
+
+                            dead.RemoveAt(0);
+                        }
+                        else
+                        {
+                            GameObject obj = Instantiate(nodePiece, gameBoard);
+                            NodePiece n =obj.GetComponent<NodePiece>();
+                            RectTransform rect = obj.GetComponent<RectTransform>();
+                            rect.anchoredPosition = getPositionFromPoint(fallPoint);
+                            piece = n;
+                        }
+                        piece.Initialize(newVal, p, pieces[newVal - 1]);
+                        Node hole = getNodeAtPoint(p);
+                        hole.SetPiece(piece);
+                        ResetPiece(piece);
+                    }
+                    break;
+                }
+            }
+        }
+    }
     void AddPoints(ref List<Point> points, List<Point> add)
     {
         foreach(Point p in add)
@@ -409,8 +426,27 @@ public class Match3 : MonoBehaviour
                     break;
                 }
             }
-
             if (doAdd) points.Add(p);
+        }
+    }
+    void setValueAtPoint(Point p, int v)
+    {
+        board[p.x, p.y].value = v;
+    }
+    void ResetPiece(NodePiece piece)
+    {
+        piece.ResetPosition();
+        update.Add(piece);
+    }
+    void ResetAllPiecePosNow()
+    {
+        for(int x = 4; x < 9; x++)
+        {
+            for(int y = 4; y < 9; y++)
+            {
+                Point p = new Point(x,y);
+                getNodeAtPoint(p).getPiece().MovePositionBack();
+            }
         }
     }
     List<Point> forComboAddPoints(List<Point> points, List<Point> add)
@@ -439,16 +475,18 @@ public class Match3 : MonoBehaviour
                 return "blank";
             
             case 1:
-                return "cube";
+                return "atk";
             
             case 2:
-                return "cylider";
+                return "def";
             
             case 3:
-                return "pryamid";
+                return "move";
             
             case 4:
-                return "sphere";
+                return "hp";
+            case 5:
+                return "Sp";
         }
         return null;
     }
@@ -458,7 +496,6 @@ public class Match3 : MonoBehaviour
         val = (random.Next(0, 100) / (100 / pieces.Length)) + 1;
         return val;
     }
-
     int getValueAtPoint(Point p)
     {
         if (p.x < 4 || p.x > 8 || p.y < 4 || p.y > 8) return -1;
@@ -473,10 +510,6 @@ public class Match3 : MonoBehaviour
         }
         return false;
     }
-    void setValueAtPoint(Point p, int v)
-    {
-        board[p.x, p.y].value = v;
-    }
 
     int newValue(ref List<int> remove)
     {
@@ -489,11 +522,7 @@ public class Match3 : MonoBehaviour
         if (available.Count <= 0) return 0;
         return available[random.Next(0, available.Count)];
     }
-    void ResetPiece(NodePiece piece)
-    {
-        piece.ResetPosition();
-        update.Add(piece);
-    }
+
     string getRandomSeed()
     {
         string seed = "";
@@ -578,7 +607,6 @@ public class Match3 : MonoBehaviour
             }
         }
     }
-
     public Node getNodeAtPoint(Point p)
     {
         return board[p.x, p.y];
