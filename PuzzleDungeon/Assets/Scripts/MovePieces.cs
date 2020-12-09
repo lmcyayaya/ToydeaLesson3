@@ -41,7 +41,7 @@ public class MovePieces : MonoBehaviour
             Vector2 nPos = Vector2.zero;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(rect,Input.mousePosition,canvas.worldCamera,out nPos);
 
-            //因為珠子的錨點在左上角所以要減去盤面的一半
+            //becaus the anchor preset of the piece is top Left ,so need to  minus (board width /2) 因為珠子的錨點在左上角所以要減去盤面的一半
             float disX = nPos.x + rect.sizeDelta.x/2 - startPos.x;
             float disY = nPos.y - rect.sizeDelta.y/2 - startPos.y;
             Vector2 dir = ((Vector2)Input.mousePosition - mouseStart);
@@ -57,18 +57,28 @@ public class MovePieces : MonoBehaviour
             else if(dir.magnitude < 32)
                 cDir = 0;
 
-            //避免拉超過盤面 每個位置上的珠子都只能拉到最旁邊為止
+            //avoid piece cross over the board 避免拉超過盤面 每個位置上的珠子都只能拉到最旁邊為止
             switch(selectedPiece.index.x)
             {
+                //    
+                //  45678 ←index
+                //4 XXXXX
+                //5 XXXXX
+                //6 XXXXX ←board
+                //7 XXXXX
+                //8 XXXXX
+
+                //most left
                 case 4:
                 {
+                    //because the size of piece is 64x64
                     if(disX > 64 * 4)
                         disX = 64 * 4;
                     else if(disX < 0)
                         disX = 0;
                     break;
                 }
-                    
+                //
                 case 5:
                 {
                     if(disX > 64 * 3)
@@ -78,7 +88,7 @@ public class MovePieces : MonoBehaviour
 
                     break;
                 }
-                
+                // middle
                 case 6:
                 {
                     if(disX > 64 * 2)
@@ -96,7 +106,7 @@ public class MovePieces : MonoBehaviour
                         disX = -64 * 3;
                    break; 
                 }
-                
+                //most right
                 case 8:
                 {
                     if(disX > 0)
@@ -160,7 +170,7 @@ public class MovePieces : MonoBehaviour
             else if(disX < 0)
                 disX = disX -32;
 
-            //Debug.Log((int)((disX)/63)+"個");
+            //
             switch(cDir)
             {
                 case 1:

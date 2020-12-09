@@ -13,8 +13,6 @@ public class NodePiece : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     public Vector2 pos;
     [HideInInspector]
     public RectTransform rect;
-
-    bool updating;
     Image img;
 
     public void Initialize(int v, Point p, Sprite piece)
@@ -53,6 +51,19 @@ public class NodePiece : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     public void MovePositionTo(Vector2 move)
     {
         rect.anchoredPosition = Vector2.Lerp(rect.anchoredPosition, move, Time.deltaTime * 16f);
+    }
+    public bool UpdatePiece()
+    {
+        if(Vector3.Distance(rect.anchoredPosition, pos) > 1)
+        {
+            MovePositionTo(pos);
+            return true;
+        }
+        else
+        {
+            rect.anchoredPosition = pos;
+            return false;
+        }
     }
     
     void UpdateName()

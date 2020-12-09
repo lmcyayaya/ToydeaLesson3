@@ -13,7 +13,6 @@ public class Match3 : MonoBehaviour
     [Header("Prefabs")]
     public GameObject nodePiece;
     [HideInInspector]
-    public bool update;
     int width = 13;
     int height = 13;
     int[] fills;
@@ -22,7 +21,7 @@ public class Match3 : MonoBehaviour
     bool clear = false  ;
     
     List<NodePiece> dead;
-
+    List<NodePiece> update;
     System.Random random;
     void Awake()
     {
@@ -40,9 +39,27 @@ public class Match3 : MonoBehaviour
             clear = !clear;
         }
     }
+    public void DroppingUpdate()
+    {
+        if(update.Count == 0)
+            StateManager.Instance.state = StateManager.State.matching;
+
+        List<NodePiece> finishedUpdating = new List<NodePiece>();
+        for(int i = 0; i < update.Count; i++)
+        {
+            NodePiece piece = update[i];
+            if (!piece.UpdatePiece()) finishedUpdating.Add(piece);
+        }
+
+        for (int i = 0; i < finishedUpdating.Count; i++)
+        {
+            NodePiece piece = finishedUpdating[i];
+            
+            update.Remove(piece);
+        }
+    }
     public void Match3Update()
     {
-        
         List<Point> connected = new List<Point>();
         comboList.Clear();
         for(int x = 4; x < 9; x++)
@@ -57,48 +74,30 @@ public class Match3 : MonoBehaviour
 
         if(connected.Count == 0)
         {
-            //沒對到東西要做的事在這
+            //If do not match anything do something here
+            StateManager.Instance.state = StateManager.State.enemyTurn;
+            return;
         }
         else
         {
-            if(clear)
+            CheckConnectTypeAndAmount(connected);
+            ComboListAdjust();
+            RemoveEmptyCombo();
+
+            Debug.Log(comboList.Count+"Combo");
+            for(int i = 0; i < comboList.Count;i++)
             {
-                CheckConnectTypeAndAmount(connected);
-                ComboListAdjust();
-
-
-                for(int i = 0; i< comboList.Count;i++)
-                {
-                    if(comboList[i].Count == 0)
-                    {
-                        comboList.Remove(comboList[i]);
-                    }
-                }
-
-                for(int i = 0; i < comboList.Count; i++)
-                {
-                    for(int j = 0; j < comboList[i].Count; j++)
-                    {
-                        
-                        //Debug.Log("第"+(i+1)+"組Combo"+"("+comboList[i][j].x+","+comboList[i][j].y+")" + ShowName(comboList[i][j]));
-                    }
-                }
-                Debug.Log(comboList.Count+"Combo");
-                for(int i = 0; i < comboList.Count;i++)
-                {
-                    Debug.Log("第"+(i+1)+"Combo "+ShowName(comboList[i][0]));
-                }
-                foreach(Point p in connected)
-                {
-                    Node node = getNodeAtPoint(p);
-                    NodePiece nodePiece =node.getPiece();
-                    if(nodePiece!=null)
-                        nodePiece.gameObject.SetActive(false);
-                    node.SetPiece(null); 
-                }
-
+                Debug.Log("第"+(i+1)+"Combo "+ShowName(comboList[i][0]));
             }
-            
+            foreach(Point p in connected)
+            {
+                Node node = getNodeAtPoint(p);
+                NodePiece nodePiece =node.getPiece();
+                if(nodePiece!=null)
+                    nodePiece.gameObject.SetActive(false);
+                node.SetPiece(null); 
+            }
+            ApplyGravityToBoard();
         }
         
         StateManager.Instance.state = StateManager.State.dropping;
@@ -110,93 +109,64 @@ public class Match3 : MonoBehaviour
         {
             case 0:
                 return "blank";
-            break;
+            
             case 1:
                 return "cube";
-            break;
+            
             case 2:
                 return "cylider";
-            break;
+            
             case 3:
                 return "pryamid";
-            break;
+            
             case 4:
                 return "sphere";
-            break;
         }
         return null;
     }
 
-    // public void ApplyGravityToBoard()
-    // {
-    //     for (int x = 4; x < 9; x++)
-    //     {
-    //         for (int y = 8 ; y > 3; y--) //Start at the bottom and grab the next
-    //         {
-    //             Point p = new Point(x, y);
-    //             Node node = getNodeAtPoint(p);
-    //             int val = getValueAtPoint(p);
-    //             if (val != 0) continue; //If not a hole, move to the next
-    //             for (int ny = (y - 1); ny >= -1; ny--)
-    //             {
-    //                 Point next = new Point(x, ny);
-    //                 int nextVal = getValueAtPoint(next);
-    //                 if (nextVal == 0)
-    //                     continue;
-    //                 if (nextVal != -1)
-    //                 {
-    //                     Node gotten = getNodeAtPoint(next);
-    //                     NodePiece piece = gotten.getPiece();
+    public void ApplyGravityToBoard()
+    {
+        for (int x = 4; x < 9; x++)
+        {
+            for (int y = 8 ; y > 3; y--) //Start at the bottom and grab the next
+            {
+                Point p = new Point(x, y);
+                Node node = getNodeAtPoint(p);
+                int val = getValueAtPoint(p);
+                if (val != 0) continue; //If not a hole, move to the next
 
-    //                     //Set the hole
-    //                     node.SetPiece(piece);
-    //                     update.Add(piece);
+                for(int ny = (y-1); ny > 3 ; ny--)
+                {
+                    Point next = new Point(x, ny);
+                    int nextVal = getValueAtPoint(next);
+                    if(nextVal == 0)
+                        continue;
+                    if(nextVal != -1)
+                    {
+                        Node got = getNodeAtPoint(next);
+                        NodePiece piece = got.getPiece();
+                        node.SetPiece(piece);
+                        update.Add(piece);
 
-    //                     //Make a new hole
-    //                     gotten.SetPiece(null);
-    //                 }
-    //                 else//Use dead ones or create new pieces to fill holes (hit a -1) only if we choose to
-    //                 {
-    //                     int newVal = fillPiece();
-    //                     NodePiece piece;
-    //                     Point fallPnt = new Point(x, (-1 - fills[x]));
-    //                     if(dead.Count > 0)
-    //                     {
-    //                         NodePiece revived = dead[0];
-    //                         revived.gameObject.SetActive(true);
-    //                         piece = revived;
-
-    //                         dead.RemoveAt(0);
-    //                     }
-    //                     else
-    //                     {
-    //                         GameObject obj = Instantiate(nodePiece, gameBoard);
-    //                         NodePiece n = obj.GetComponent<NodePiece>();
-    //                         piece = n;
-    //                     }
-
-    //                     piece.Initialize(newVal, p, pieces[newVal - 1]);
-    //                     piece.rect.anchoredPosition = getPositionFromPoint(fallPnt);
-
-    //                     Node hole = getNodeAtPoint(p);
-    //                     hole.SetPiece(piece);
-    //                     ResetPiece(piece);
-    //                     fills[x]++;
-    //                 }
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
+                        got.SetPiece(null);
+                    }
+                    else
+                    {
+                        
+                    }
+                    break;
+                }
+            }
+        }
+    }
     void StartGame()
     {
         fills = new int[width];
         string seed = getRandomSeed();
         random = new System.Random(seed.GetHashCode());
         comboList = new List<List<Point>>();
-        //update = new List<NodePiece>();
-        // flipped = new List<FlippedPieces>();
-        // dead = new List<NodePiece>();
+        update = new List<NodePiece>();
 
         InitializeBoard();
         VerifyBoard();
@@ -325,11 +295,23 @@ public class Match3 : MonoBehaviour
 
 
     }
+    void RemoveEmptyCombo()
+    {
+        for(int i = 0; i< comboList.Count;i++)
+        {
+            if(comboList[i].Count == 0)
+            {
+                comboList.Remove(comboList[i]);
+            }
+        }
+    }
     List<Point> isConnected(Point p, bool main)
     {
         
         List<Point> connected = new List<Point>();
         int val = getValueAtPoint(p);
+        if(val == 0)
+            return connected;
         Point[] directions =
         {
             Point.up,
@@ -490,7 +472,7 @@ public class Match3 : MonoBehaviour
     }
     public void CopyBoard()
     {
-        //左邊複製
+        //Left
         for(int x = 0; x < 4;x++)
         {
             for(int y = 4; y < 9; y++)
@@ -507,7 +489,7 @@ public class Match3 : MonoBehaviour
 
             }
         }
-        //上面複製
+        //Top
         for(int x = 4; x < 9;x++)
         {
             for(int y = 0; y < 4; y++)
@@ -523,7 +505,7 @@ public class Match3 : MonoBehaviour
                 node.getPiece().RestSprite(pieces[val-1]);
             }
         }
-        //右邊
+        //Right
         for(int x = 9; x < width;x++)
         {
             for(int y = 4; y < 9; y++)
@@ -539,7 +521,7 @@ public class Match3 : MonoBehaviour
                 node.getPiece().RestSprite(pieces[val-1]);
             }
         }
-        //下面
+        //bottom
         for(int x = 4; x < 9;x++)
         {
             for(int y = 9; y < height; y++)

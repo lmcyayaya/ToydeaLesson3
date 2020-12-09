@@ -49,7 +49,7 @@ public class StateManager : MonoBehaviour
             }
             case State.dropping :
             {
-                state = State.enemyTurn;
+                game.DroppingUpdate();
                 break;
             }
             case State.enemyTurn :
