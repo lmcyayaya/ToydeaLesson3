@@ -180,7 +180,7 @@ public class MovePieces : MonoBehaviour
                     {
                         Vector2 pos = Vector2.right * (int)((disX)/63) * 64;
                         moveAmount = (int)((disX)/63);
-                        piece.MovePositionTo(game.getPositionFromPoint(piece.index)+pos);
+                        piece.MovePositionTo(game.getPositionFromPoint(piece.index)+pos,20f);
                     }
                     break;
                 }
@@ -192,7 +192,7 @@ public class MovePieces : MonoBehaviour
                     {
                         Vector2 pos = Vector2.up * (int)((disY)/63) * 64;
                         moveAmount = -(int)((disY)/63);
-                        piece.MovePositionTo(game.getPositionFromPoint(piece.index)+pos);
+                        piece.MovePositionTo(game.getPositionFromPoint(piece.index)+pos,20f);
                     }
                     break;
                 }  

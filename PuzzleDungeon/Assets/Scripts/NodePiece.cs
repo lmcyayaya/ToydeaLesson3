@@ -48,15 +48,15 @@ public class NodePiece : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         rect.anchoredPosition += move * Time.deltaTime * 16f;
     }
 
-    public void MovePositionTo(Vector2 move)
+    public void MovePositionTo(Vector2 move,float speed)
     {
-        rect.anchoredPosition = Vector2.Lerp(rect.anchoredPosition, move, Time.deltaTime * 16f);
+        rect.anchoredPosition = Vector2.Lerp(rect.anchoredPosition, move, Time.deltaTime * speed);
     }
     public bool UpdatePiece()
     {
         if(Vector3.Distance(rect.anchoredPosition, pos) > 1)
         {
-            MovePositionTo(pos);
+            MovePositionTo(pos,10f);
             return true;
         }
         else
