@@ -21,7 +21,7 @@ public class Match3 : MonoBehaviour
     int[] fills;
     Node[,] board;
     List<List<Point>> comboList;
-    bool clearing = false  ;
+    bool clearing = false;
     
     List<NodePiece> dead;
     List<NodePiece> update;
