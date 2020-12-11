@@ -1,70 +1,235 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using DG.Tweening;
 
 public class Player : MonoBehaviour
 {
+    public static Player Instance
+    {
+        get
+        {
+            return instance;
+        }
+    }
+    static Player instance;
+    public enum PlayerState
+    {
+        move,attack
+    }
+    public PlayerState playerState;
     public Point index;
+    public UIState uiState;
     bool moving;
-    bool hasFound;
-    bool test;
-    int moveX;
-    int moveY;
+    bool attackReady;
+    public bool hasAttacked;
+    int actionState;
     List<Point> canMoveList;
     List<Point> moveList;
     List<List<Point>> moveListList; 
+    List<Point> canAttackList;
+    void Awake()
+    {
+        instance = this;
+    }
     void Start()
     {
         moveList = new List<Point>();
         canMoveList = new List<Point>();
         moveListList = new List<List<Point>>();
+        canAttackList = new List<Point>();
     }
 
-    void Update()
+    public void ActionUpdate()
     {
         if(moving)
             return;
-        if(Input.GetKeyDown(KeyCode.Space))
+        //actionState : 0 is first in ,1 is first action,2  is second action ,this action complete will rest state and turn the state of statemanager to enemyTurn
+        switch(actionState) 
+        {
+            case 0 :
+            {
+
+                if(ProcessedData.Instance.atkDropsCount > ProcessedData.Instance.moveDropsCount)
+                
+                    playerState = PlayerState.attack;
+                
+                    
+                else if(ProcessedData.Instance.atkDropsCount < ProcessedData.Instance.moveDropsCount)
+                
+                    playerState = PlayerState.move;
+           
+                else//if movedrops equal attackdrops, Attack priority 
+                
+                    playerState = PlayerState.attack;
+     
+                    
+
+                actionState +=1;
+                break;
+            }
+            case 1 :
+            {
+                if(playerState == PlayerState.move)
+                {
+                    if(ProcessedData.Instance.move <= 0)
+                    {
+                        actionState += 1;
+                        ChangeGridColor(canMoveList,Color.white);
+                        moveListList.Clear();
+                        canMoveList.Clear();
+                        playerState = PlayerState.attack;
+                        return;
+                    }
+                    StateMoveNeedToDo();
+                }
+                else
+                {
+                    if(ProcessedData.Instance.atkDropsCount <= 0)
+                    {
+                        playerState = PlayerState.move;
+                        return;
+                    }
+                        
+                    if(hasAttacked)
+                    {
+                        actionState += 1;
+                        playerState = PlayerState.move;
+                        ChangeGridColor(canAttackList,Color.white);
+                        canAttackList.Clear();
+                        attackReady = false;
+                        hasAttacked = false;
+                        return;
+                    }
+
+                    StateAttackNeedToDo();
+                }
+                break;
+            }
+            case 2 :
+            {
+                if(playerState == PlayerState.move)
+                {
+                    if(ProcessedData.Instance.move <= 0)
+                    {
+                        actionState = 0;
+                        ChangeGridColor(canMoveList,Color.white);
+                        moveListList.Clear();
+                        canMoveList.Clear();
+                        StateManager.Instance.state = StateManager.State.enemyTurn;
+                        return;
+                    }
+                    StateMoveNeedToDo();
+                }
+                else
+                {
+                    if(ProcessedData.Instance.atkDropsCount <= 0)
+                    {
+                        actionState = 0;
+                        StateManager.Instance.state = StateManager.State.enemyTurn;
+                        return;
+                    }
+                        
+                    if(hasAttacked)
+                    {
+                        actionState = 0;
+                        StateManager.Instance.state = StateManager.State.enemyTurn;
+                        ChangeGridColor(canAttackList,Color.white);
+                        canAttackList.Clear();
+                        attackReady = false;
+                        hasAttacked = false;
+                        return;
+                    }
+                    StateAttackNeedToDo();
+                }
+                break;
+            }
+        }
+    }
+    void StateMoveNeedToDo()
+    {
+        if(canMoveList.Count == 0)
         {
             UpdateIndex();
             canMoveList.Add(index);
-            FindCanMovePoints(4,index);
-            foreach(Point p in canMoveList)
+            FindCanMovePoints(Mathf.Clamp(ProcessedData.Instance.move,0,5),index);
+            canMoveList.Remove(index);
+            ChangeGridColor(canMoveList,Color.red);
+            uiState.ChangeState("移動選択");
+        }
+        else
+        {
+            if(Input.GetMouseButtonDown(0))
             {
-                Map.Instance.getNodeAtPoint(p).getPiece().transform.GetComponent<SpriteRenderer>().color = Color.red;
+                var hit = Physics2D.Raycast(new Vector2(Camera.main.ScreenToWorldPoint(Input.mousePosition).x,Camera.main.ScreenToWorldPoint(Input.mousePosition).y), Vector2.zero, 0f);
+                MapNodePiece piece =  hit.transform.GetComponent<MapNodePiece>();
+                if(!Map.Instance.isContainPointInPointList(canMoveList,piece.index) || piece == null)
+                    return;
+                moveList.Clear();
+                FindTheWay(Mathf.Clamp(ProcessedData.Instance.move,0,5),index,piece .index);
+                FindTheLowestPath();
+                Move(moveList,0);
+                ProcessedData.Instance.move -= moveList.Count;
+                ChangeGridColor(canMoveList,Color.white);
+                moveListList.Clear();
+                canMoveList.Clear();
+
             }
         }
-        if(Input.GetMouseButtonDown(0))
+    }
+    void StateAttackNeedToDo()
+    {
+        if(!attackReady)
         {
-            //UpdateIndex();
-            moveList.Clear();
-            var hit = Physics2D.Raycast(new Vector2(Camera.main.ScreenToWorldPoint(Input.mousePosition).x,Camera.main.ScreenToWorldPoint(Input.mousePosition).y), Vector2.zero, 0f);
-            hit.transform.GetComponent<MapNodePiece>();
-            FindTheWay(4,index,hit.transform.GetComponent<MapNodePiece>().index);
-            FindTheLowestPath();
-            Move(moveList,0);
-
-            // UpdateIndex();
-            // var hit = Physics2D.Raycast(new Vector2(Camera.main.ScreenToWorldPoint(Input.mousePosition).x,Camera.main.ScreenToWorldPoint(Input.mousePosition).y), Vector2.zero, 0f);
-            // MapNodePiece piece = hit.transform.GetComponent<MapNodePiece>();
-            // if(piece!=null)
-            // {
-            //     StartCoroutine(Move(piece.index.x - index.x,piece.index.y - index.y));
-            //     moving = true;
-            // }
+            uiState.ChangeState("攻擊選択");
+            UpdateIndex();
+            Point[] directions =
+            {
+                Point.up,
+                Point.right,
+                Point.down,
+                Point.left
+            };
+            foreach(Point dir in directions)
+            {
+                Point next = Point.add(index,dir);
+                if(next.x >= Map.Instance.width || next.y >= Map.Instance.height || next.x < 0 || next.y < 0) 
+                    continue;
+                if(Map.Instance.getNodeAtPoint(next).value == 0 ||Map.Instance.getNodeAtPoint(next).value == 2 )
+                    canAttackList.Add(next);
+            }
+            ChangeGridColor(canAttackList,Color.red);
+            attackReady = true;
         }
+        else
+        {
+            if(Input.GetMouseButtonDown(0))
+            {
+                var hit = Physics2D.Raycast(new Vector2(Camera.main.ScreenToWorldPoint(Input.mousePosition).x,Camera.main.ScreenToWorldPoint(Input.mousePosition).y), Vector2.zero, 0f);
+                MapNodePiece piece =  hit.transform.GetComponent<MapNodePiece>();
+                if(piece == null)
+                    return;
+                if(!Map.Instance.isContainPointInPointList(canAttackList,piece.index))
+                    return;
+
+                hasAttacked = true;
+            }
+
+        }
+        
+
+        
     }
     void UpdateIndex()
     {
-        RaycastHit2D hit =  Physics2D.Raycast(transform.position,Vector3.forward);
+        RaycastHit2D hit =  Physics2D.Raycast(transform.position + Vector3.forward*0.01f,Vector3.forward);
         MapNodePiece piece = hit.transform.GetComponent<MapNodePiece>();
         index.x = piece.index.x;
         index.y = piece.index.y;
     }
     void FindCanMovePoints(int moveAmount,Point p)
     {
-        test = true;
         if(moveAmount == 0)
             return;
 
@@ -78,6 +243,9 @@ public class Player : MonoBehaviour
         foreach(Point dir in directions)
         {
             Point next = Point.add(p,dir);
+            if(next.x >= Map.Instance.width || next.y >= Map.Instance.height || next.x < 0 || next.y < 0) 
+                continue;
+            
             if(Map.Instance.getNodeAtPoint(next).value == 1)
             {
                 continue;
@@ -93,19 +261,18 @@ public class Player : MonoBehaviour
                     canMoveList.Add(next);
                     FindCanMovePoints(moveAmount-1,next);
                 }
-            }
-                
+            }   
         }
         
     }
     void FindTheLowestPath()    
     { 
-        int i = moveListList[0].Count;
-        moveList = moveListList[0];
-        foreach(List<Point> list in moveListList)
+        var i = int.MaxValue;
+        foreach(var list in moveListList)
         {
             if(list.Count < i)
             {
+                i =list.Count;
                 moveList = list;
             }
                 
@@ -126,6 +293,8 @@ public class Player : MonoBehaviour
         foreach(Point dir in directions)
         {
             Point next = Point.add(startPoint,dir);
+            if(next.x >= Map.Instance.width || next.y >= Map.Instance.height || next.x < 0 || next.y < 0) 
+                continue;
             if(Map.Instance.getNodeAtPoint(next).value == 1)
             {
                 continue;
@@ -135,7 +304,6 @@ public class Player : MonoBehaviour
                 moveList.Add(next);
                 if(next.x == endPoint.x && next.y == endPoint.y)
                 {
-                    //hasFound = true;
                     moveListList.Add(new List<Point>());
                     CopyList(moveList,moveListList[moveListList.Count-1]);
 
@@ -149,7 +317,6 @@ public class Player : MonoBehaviour
     }
     void Move(List<Point> path,int i)
     {
-        Debug.Log(path.Count);
         moving = true;
         if(i > 0)
         {
@@ -198,10 +365,16 @@ public class Player : MonoBehaviour
     }
     void CopyList(List<Point> copy,List<Point> to)
     {
-        Debug.Log(copy.Count);
         foreach(Point p in copy)
         {
             to.Add(p);
+        }
+    }
+    void ChangeGridColor(List<Point> list,Color color)
+    {
+        foreach(Point p in list)
+        {
+            Map.Instance.getNodeAtPoint(p).getPiece().transform.GetComponent<SpriteRenderer>().color = color;
         }
     }
 }

@@ -17,8 +17,8 @@ public class StateManager : MonoBehaviour
         myTurn,turning,matching,dropping,action,enemyTurn
     }
     public State state;
+    public Player player;
     Match3 game;
-    
     void Awake() 
     {
         instance = this;
@@ -50,6 +50,11 @@ public class StateManager : MonoBehaviour
             case State.dropping :
             {
                 game.DroppingUpdate();
+                break;
+            }
+            case State.action:
+            {
+                player.ActionUpdate();
                 break;
             }
             case State.enemyTurn :

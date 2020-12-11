@@ -15,6 +15,7 @@ public class Match3 : MonoBehaviour
     public GameObject nodePiece;
     public Image timeLine;
     public float turningTime; 
+    public GameObject skipButton;
     float time;
     int width = 13;
     int height = 13;
@@ -40,6 +41,7 @@ public class Match3 : MonoBehaviour
             MovePieces.Instance.DropPiece();
             ResetAllPiecePosNow();
             StateManager.Instance.state = StateManager.State.matching;
+            ProcessedData.Instance.InitData();
         } 
         else
             time -= Time.deltaTime;
@@ -83,7 +85,16 @@ public class Match3 : MonoBehaviour
         {
             //If do not match anything do something here
             CopyBoard();
-            StateManager.Instance.state = StateManager.State.enemyTurn;
+            ProcessedData.Instance.CalculateData();
+            if(ProcessedData.Instance.move > 0 || ProcessedData.Instance.atkDropsCount > 0 )
+            {
+                skipButton.SetActive(true);
+                StateManager.Instance.state = StateManager.State.action;
+            }
+            else
+            {
+                StateManager.Instance.state = StateManager.State.enemyTurn;
+            }
             time = turningTime;
             return;
         }
@@ -165,46 +176,38 @@ public class Match3 : MonoBehaviour
     }
     void CheckConnectTypeAndAmount(List<Point> connected)
     {
-        int atk = 0;
-        int def = 0;
-        int move = 0 ;
-        int hp = 0;
-        int sp = 0;
-
         foreach(Point p in connected)
         {
-            //Debug.Log("("+p.x+","+p.y+")");
             switch(getValueAtPoint(p))
             {
                 case 1 :
                 {
-                    atk += 1;
+                    ProcessedData.Instance.atkDropsCount += 1;
                     break;
                 }
                 case 2 :
                 {
-                    def += 1;
+                    ProcessedData.Instance.defDropsCount += 1;
                     break;
                 }
                 case 3 :
                 {
-                    move += 1;
+                    ProcessedData.Instance.moveDropsCount += 1;
                     break;
                 }
                 case 4 :
                 {
-                    hp += 1;
+                    ProcessedData.Instance.hpDropsCount += 1;
                     break;
                 }
                 case 5 :
                 {
-                    sp += 1;
+                    ProcessedData.Instance.spDropsCount += 1;
                     break;
                 }
-                
             }
         }
-        Debug.Log("Cube有"+atk+"個,"+"cylinder有"+move+"個,"+"prymid有"+def+"個,"+"sphere有"+sp+"個,");
+
     }
     void ComboListAdjust()
     {
@@ -263,9 +266,11 @@ public class Match3 : MonoBehaviour
                     nodePiece.gameObject.SetActive(false);
                     dead.Add(nodePiece);
                 }
-                node.SetPiece(null); 
+                node.SetPiece(null);
+
             }
-            if(comboList.IndexOf(pointList)==comboList.Count-1)
+            ProcessedData.Instance.combo += 1;
+            if(comboList.IndexOf(pointList) == comboList.Count-1)
                 yield return null;
             else
                 yield return new WaitForSeconds(0.2f);
