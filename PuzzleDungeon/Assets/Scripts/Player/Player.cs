@@ -213,6 +213,9 @@ public class Player : MonoBehaviour
                 if(!Map.Instance.isContainPointInPointList(canAttackList,piece.index))
                     return;
 
+
+                piece.GetComponentInParent<Enemy>().currentHP -= ProcessedData.Instance.atk;
+
                 hasAttacked = true;
             }
 
@@ -246,7 +249,7 @@ public class Player : MonoBehaviour
             if(next.x >= Map.Instance.width || next.y >= Map.Instance.height || next.x < 0 || next.y < 0) 
                 continue;
             
-            if(Map.Instance.getNodeAtPoint(next).value == 1)
+            if(Map.Instance.getNodeAtPoint(next).value != 0)
             {
                 continue;
             }
@@ -295,7 +298,7 @@ public class Player : MonoBehaviour
             Point next = Point.add(startPoint,dir);
             if(next.x >= Map.Instance.width || next.y >= Map.Instance.height || next.x < 0 || next.y < 0) 
                 continue;
-            if(Map.Instance.getNodeAtPoint(next).value == 1)
+            if(Map.Instance.getNodeAtPoint(next).value != 0)
             {
                 continue;
             }

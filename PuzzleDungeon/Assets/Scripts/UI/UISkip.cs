@@ -6,10 +6,14 @@ using UnityEngine.UI;
 
 public class UISkip : MonoBehaviour
 {
+    Image image;
     Button button;
+    Text text;
     void Start()
     {
         button = GetComponent<Button>();
+        image = GetComponent<Image>();
+        text = transform.GetComponentInChildren<Text>();
     }
 
 
@@ -17,7 +21,17 @@ public class UISkip : MonoBehaviour
     {
         if(StateManager.Instance.state != StateManager.State.action)
         {
-           transform.gameObject.SetActive(false);
+            button.interactable = false;
+            image.raycastTarget = false;
+            image.color = new Color(0,0,0,0);
+            text.color = new Color(0,0,0,0);
+        }
+        else if(StateManager.Instance.state == StateManager.State.action)
+        {
+            button.interactable = true;
+            image.raycastTarget = true;
+            image.color = Color.white;
+            text.color = Color.black;
         }
         
     }

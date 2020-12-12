@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class MapNodePiece : MonoBehaviour
 {
-    public bool hasOnMap;
     public int value;
     public Point index;
 
@@ -15,10 +14,7 @@ public class MapNodePiece : MonoBehaviour
     {
             
     }
-    public void Initialize(int val,Point p)
-    {
 
-    }
     public void SetIndex(Point p)
     {
         index = p;
@@ -35,6 +31,8 @@ public class MapNodePiece : MonoBehaviour
             transform.name = "Road [" + index.x + ", " + index.y + "]";
         if(value == 1)
             transform.name = "Wall [" + index.x + ", " + index.y + "]";
+        if(value == 2)
+            transform.name = "EnemyBody [" + index.x + ", " + index.y + "]";
     }
 
 }

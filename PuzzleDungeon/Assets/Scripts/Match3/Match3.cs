@@ -15,7 +15,6 @@ public class Match3 : MonoBehaviour
     public GameObject nodePiece;
     public Image timeLine;
     public float turningTime; 
-    public GameObject skipButton;
     float time;
     int width = 13;
     int height = 13;
@@ -88,7 +87,7 @@ public class Match3 : MonoBehaviour
             ProcessedData.Instance.CalculateData();
             if(ProcessedData.Instance.move > 0 || ProcessedData.Instance.atkDropsCount > 0 )
             {
-                skipButton.SetActive(true);
+                
                 StateManager.Instance.state = StateManager.State.action;
             }
             else

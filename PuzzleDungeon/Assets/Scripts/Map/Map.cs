@@ -68,13 +68,13 @@ public class Map : MonoBehaviour
                 MapNode node = getNodeAtPoint(new Point(x, y));
 
                 int val = node.value;
-                if (val !=0) continue;
+                if (val != 0 ) continue;
                 GameObject p = Instantiate(road, transform);
                 MapNodePiece piece = p.GetComponent<MapNodePiece>();
                 Transform rect = p.GetComponent<Transform>();
                 rect.position = new Vector2(transform.position.x + (cellSize * x)+cellSize/2, transform.position.y - (cellSize * y)-cellSize/2);
-                piece.Initialize(val, new Point(x, y));
                 node.SetPiece(piece);
+                
             }
         }
     }
