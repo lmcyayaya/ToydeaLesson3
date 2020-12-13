@@ -8,27 +8,30 @@ public class CameraManager : MonoBehaviour
     public Vector3 pivot;
     public float zoomSpeed;
     Camera mainCamera;
-    bool IsZoom = false;
-    float DoubleTouchCurrDis;
-    float DoubleTouchLastDis;
+    // bool IsZoom = false;
+    // float DoubleTouchCurrDis;
+    // float DoubleTouchLastDis;
+    float targetSize;
     void Start()
     {
         mainCamera = Camera.main;
+        targetSize = mainCamera.orthographicSize;
     }
 
     void FixedUpdate()
     {
+        mainCamera.orthographicSize = Mathf.Lerp(mainCamera.orthographicSize,targetSize,0.2f);
         
-        if( Input.GetAxis("Mouse ScrollWheel") > 0 )
+        if( Input.GetAxis("Mouse ScrollWheel") < 0 )
         {
-            mainCamera.orthographicSize += zoomSpeed * Time.deltaTime;
+            targetSize += zoomSpeed * Time.deltaTime;
         }
-        else if( Input.GetAxis("Mouse ScrollWheel") < 0 )
+        else if( Input.GetAxis("Mouse ScrollWheel") > 0 )
         {
-            mainCamera.orthographicSize -= zoomSpeed * Time.deltaTime;
+            targetSize -= zoomSpeed * Time.deltaTime;
         }
         mainCamera.orthographicSize = Mathf.Clamp(mainCamera.orthographicSize,2,5);
-        mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position,player.transform.position+(pivot * mainCamera.orthographicSize / 2 ),0.2f);
+        mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position,player.transform.position+(pivot * mainCamera.orthographicSize / 2 ),0.7f);
         // if ((Input.touchCount  ==2) && (Input.GetTouch(0).phase == TouchPhase.Moved || Input.GetTouch(1).phase == TouchPhase.Moved))
         // {
         //     Touch touch1 = Input.GetTouch(0);

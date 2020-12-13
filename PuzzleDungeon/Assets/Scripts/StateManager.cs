@@ -17,7 +17,8 @@ public class StateManager : MonoBehaviour
         myTurn,turning,matching,dropping,action,enemyTurn
     }
     public State state;
-    public Player player;
+
+    public Enemy[] enemys;
     Match3 game;
     void Awake() 
     {
@@ -54,11 +55,15 @@ public class StateManager : MonoBehaviour
             }
             case State.action:
             {
-                player.ActionUpdate();
+                Player.Instance.ActionUpdate();
                 break;
             }
             case State.enemyTurn :
             {
+                foreach(Enemy enemy in enemys)
+                {
+                    enemy.EnemyNeedToDO();
+                }
                 state = State.myTurn;
                 break;
             }

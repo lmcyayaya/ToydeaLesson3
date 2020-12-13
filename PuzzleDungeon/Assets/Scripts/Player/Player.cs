@@ -196,7 +196,7 @@ public class Player : MonoBehaviour
                 Point next = Point.add(index,dir);
                 if(next.x >= Map.Instance.width || next.y >= Map.Instance.height || next.x < 0 || next.y < 0) 
                     continue;
-                if(Map.Instance.getNodeAtPoint(next).value == 0 ||Map.Instance.getNodeAtPoint(next).value == 2 )
+                if(/*Map.Instance.getNodeAtPoint(next).value == 0 ||*/Map.Instance.getNodeAtPoint(next).value == 2 )
                     canAttackList.Add(next);
             }
             ChangeGridColor(canAttackList,Color.red);
@@ -204,6 +204,8 @@ public class Player : MonoBehaviour
         }
         else
         {
+            if(canAttackList.Count == 0)
+                hasAttacked = true;
             if(Input.GetMouseButtonDown(0))
             {
                 var hit = Physics2D.Raycast(new Vector2(Camera.main.ScreenToWorldPoint(Input.mousePosition).x,Camera.main.ScreenToWorldPoint(Input.mousePosition).y), Vector2.zero, 0f);
@@ -309,10 +311,7 @@ public class Player : MonoBehaviour
                 {
                     moveListList.Add(new List<Point>());
                     CopyList(moveList,moveListList[moveListList.Count-1]);
-
-                    
                 }
-                
                 FindTheWay(moveAmount - 1,next,endPoint);
                 moveList.Remove(next);
             }

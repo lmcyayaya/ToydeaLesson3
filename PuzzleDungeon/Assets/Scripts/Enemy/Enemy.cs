@@ -11,11 +11,7 @@ public class Enemy : MonoBehaviour
     {
         currentHP = maxHP;
     }
-    protected virtual void Move()
-    {
-
-    }
-    protected virtual void Attack()
+    public virtual void EnemyNeedToDO()
     {
 
     }

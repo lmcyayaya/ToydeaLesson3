@@ -53,11 +53,11 @@ public class ProcessedData : MonoBehaviour
     }
     public void CalculateData()
     {
-        atk = atkDropsCount * (1 + (combo - 1) * 0.25f) * ATK;
-        def = defDropsCount * (1 + (combo - 1) * 0.25f) * DEF;
-        move = (int)((moveDropsCount - 2) * (1 + (combo - 1) * 0.15f));
-        hp = hpDropsCount * (1 + (combo - 1) * 0.25f) * HP;
-        sp = spDropsCount * (1 + (combo - 1) * 0.25f) * SP;
+        atk = atkDropsCount * ATK * (1 + (combo - 1) * 0.25f);
+        def = defDropsCount * DEF * (1 + (combo - 1) * 0.25f);
+        move = (int)((moveDropsCount/3) *(1 + (combo - 1) * 0.5f));
+        hp = hpDropsCount * HP * (1 + (combo - 1) * 0.25f);
+        sp = spDropsCount * SP * (1 + (combo - 1) * 0.25f);
         move = Mathf.Clamp(move,0,10);
     }
 }

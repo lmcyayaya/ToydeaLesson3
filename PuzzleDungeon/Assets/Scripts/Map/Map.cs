@@ -82,6 +82,16 @@ public class Map : MonoBehaviour
     {
         return mapBoard[p.x, p.y];
     }
+    public void SwitchNodePieceAndValue(Point a,Point b)
+    {
+        MapNodePiece pieceA = getNodeAtPoint(a).getPiece();
+        MapNode nodeA = getNodeAtPoint(a);
+        MapNodePiece pieceB = getNodeAtPoint(b).getPiece();
+        MapNode nodeB = getNodeAtPoint(b);
+
+        nodeA.SetPiece(pieceB);
+        nodeB.SetPiece(pieceA);
+    }
     public bool isContainPointInPointList(List<Point> list, Point p)
     {
         for(int i = 0 ; i < list.Count; i++)

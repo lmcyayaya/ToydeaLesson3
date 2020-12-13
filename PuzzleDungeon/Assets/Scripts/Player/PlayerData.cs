@@ -4,13 +4,26 @@ using UnityEngine;
 
 public class PlayerData : MonoBehaviour
 {
-    // Start is called before the first frame update
+    public static PlayerData Instance
+    {
+        get
+        {
+            return instance;
+        }
+    }
+    static PlayerData instance;
+    public float maxHP;
+    public float currentHP;
+    public float maxEP;
+    public float currentEP;
+    void Awake()
+    {
+        instance = this;   
+    }
     void Start()
     {
-        
+        currentHP = maxHP;
     }
-
-    // Update is called once per frame
     void Update()
     {
         
