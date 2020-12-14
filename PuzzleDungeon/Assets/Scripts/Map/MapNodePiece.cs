@@ -9,17 +9,24 @@ public class MapNodePiece : MonoBehaviour
 
     [HideInInspector]
     public Vector3 pos;
-
+    public Color lastColor;
+    public SpriteRenderer sprite;
     void Start() 
     {
-            
+        sprite = GetComponent<SpriteRenderer>();
     }
 
     public void SetIndex(Point p)
     {
         index = p;
+        sprite = GetComponent<SpriteRenderer>();
+        lastColor = sprite.color;
         ResetPosition();
         UpdateName();
+    }
+    public void SetColor(Color color)
+    {
+        
     }
     public void ResetPosition()
     {

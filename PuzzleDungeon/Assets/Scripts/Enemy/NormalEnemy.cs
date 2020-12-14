@@ -10,6 +10,7 @@ public class NormalEnemy : Enemy
     MapNodePiece piece;
     Color oriColor;
     SpriteRenderer sprite;
+    SpriteRenderer attackNode;
     Point oriPoint;
     List<Point> moveList;
     List<List<Point>> moveListList;
@@ -25,45 +26,32 @@ public class NormalEnemy : Enemy
         oriPoint = piece.index;
         currentHP = maxHP;
     }
-    void Update()
-    {
-        // if(Input.GetKeyDown(KeyCode.Space))
-        // {
-        //     DetectPlayer(detectDis,piece.index);
-        // }
-        
-    }
     public override void EnemyNeedToDO()
     {
+        if(attackNode != null)
+        {
+            attackNode.color = Color.white;
+            attackNode = null;
+        }
         hasAround = false;
-        Point[] directions =
+        Point dir = CheckBeside();
+        if(dir != null)
         {
-            Point.up,
-            Point.right,
-            Point.down,
-            Point.left
-        };
-        foreach(Point dir in directions)
-        {
-            Point next = Point.add(piece.index,dir);
-            if(next.x == Player.Instance.index.x && next.y == Player.Instance.index.y)
-            {
-                AttackPlayer();
-                if(dir.Equals(Point.up))
-                    transform.rotation = Quaternion.Euler(Vector3.forward * 180);
-                else if(dir.Equals(Point.down))
-                    transform.rotation = Quaternion.Euler(Vector3.zero);
-                else if(dir.Equals(Point.right))
-                    transform.rotation = Quaternion.Euler(Vector3.forward * -90);
-                else if(dir.Equals(Point.left))
-                    transform.rotation = Quaternion.Euler(Vector3.forward * 90);
-
-                    
+            AttackPlayer();
+            attackNode = Map.Instance.getNodeAtPoint(Player.Instance.index).getPiece().GetComponent<SpriteRenderer>();
+            attackNode.color = Color.red;
+            if(dir.Equals(Point.up))
+                transform.rotation = Quaternion.Euler(Vector3.forward * 180);
+            else if(dir.Equals(Point.down))
+                transform.rotation = Quaternion.Euler(Vector3.zero);
+            else if(dir.Equals(Point.right))
+                transform.rotation = Quaternion.Euler(Vector3.forward * -90);
+            else if(dir.Equals(Point.left))
+                transform.rotation = Quaternion.Euler(Vector3.forward * 90);
 
                 return;
-            }
-
         }
+
         DetectPlayer(detectDis,piece.index);
         if(hasAround)
         {
@@ -71,23 +59,15 @@ public class NormalEnemy : Enemy
             moveList.Clear();
             FindTheWay(detectDis,piece.index,Player.Instance.index);
             FindTheLowestPath();
-            Move(moveList[0]);
+            if(moveList.Count !=0)
+                Move(moveList[0]);
             moveListList.Clear();
             sprite.color = Color.red;
+            
         } 
         else
         {
             sprite.color = oriColor;
-            // if(Point.Equals(piece.index,oriPoint))
-            // {
-            //     return;
-            // }
-            // else
-            // {
-            //     // Move(hasMoveList[hasMoveList.Count-1]);
-            //     // hasMoveList.RemoveAt(hasMoveList.Count-1);
-            // }
-            
         }
         
         
@@ -120,8 +100,9 @@ public class NormalEnemy : Enemy
             if(next.x >= Map.Instance.width || next.y >= Map.Instance.height || next.x < 0 || next.y < 0) 
                 continue;
             
-            if(Map.Instance.getNodeAtPoint(next).value != 0)
+            if(Map.Instance.getNodeAtPoint(next).value == 1 )
             {
+                
                 continue;
             }
             else
@@ -132,6 +113,9 @@ public class NormalEnemy : Enemy
     }
     void Move(Point p)
     {
+        MapNodePiece target = Map.Instance.getNodeAtPoint(p).getPiece();
+        if(target.value == 2)
+            return;
         
         if(Mathf.Abs(p.x - piece.index.x) == 0)
         {
@@ -150,15 +134,24 @@ public class NormalEnemy : Enemy
 
         
         piece.transform.parent = null;
-        transform.DOMove(Map.Instance.getNodeAtPoint(p).getPiece().transform.position,0.2f).OnComplete(()=>
+        Map.Instance.SwitchNodePieceAndValue(piece.index,p);
+        transform.DOMove(target.transform.position,0.2f).OnComplete(()=>
         {
-            Map.Instance.getNodeAtPoint(p).getPiece().transform.position = piece.transform.position;
-            Map.Instance.SwitchNodePieceAndValue(piece.index,p);
-            piece.transform.parent = transform;
+            
             piece.transform.localPosition = Vector3.zero;
             //hasMoveList.Add(p);
+
+            if(CheckBeside() != null)
+            {
+                Debug.Log("In");
+
+                attackNode = Map.Instance.getNodeAtPoint(Player.Instance.index).getPiece().GetComponent<SpriteRenderer>();
+                attackNode.color = Color.red;
+            }
             
         });
+        target.transform.position = piece.transform.position;
+        piece.transform.parent = transform;
     }
     void FindTheWay(int detectDis,Point startPoint,Point endPoint)
     {
@@ -176,7 +169,7 @@ public class NormalEnemy : Enemy
             Point next = Point.add(startPoint,dir);
             if(next.x >= Map.Instance.width || next.y >= Map.Instance.height || next.x < 0 || next.y < 0) 
                 continue;
-            if(Map.Instance.getNodeAtPoint(next).value != 0)
+            if(Map.Instance.getNodeAtPoint(next).value == 1)
             {
                 continue;
             }
@@ -194,18 +187,46 @@ public class NormalEnemy : Enemy
             }
         }
     }
+    Point CheckBeside()
+    {
+        Point[] directions =
+        {
+            Point.up,
+            Point.right,
+            Point.down,
+            Point.left
+        };
+        foreach(Point dir in directions)
+        {
+            
+            Point next = Point.add(piece.index,dir);
+            if(next.x == Player.Instance.index.x && next.y == Player.Instance.index.y)
+            {
+                return dir;
+            }
+        }
+        return null;
+    }
     void FindTheLowestPath()    
     { 
         var i = int.MaxValue;
+        var j = int.MaxValue;
+        List<Point> tmp = null;
         foreach(var list in moveListList)
         {
-            if(list.Count < i)
+            if(!ListContainsEnemy(list) && list.Count < j)
+            {
+                j = list.Count;
+                tmp = list;
+            }
+            if(list.Count < i )
             {
                 i =list.Count;
                 moveList = list;
             }
-                
         }
+        if(tmp != null)
+            moveList = tmp;
     }
     void CopyList(List<Point> copy,List<Point> to)
     {
@@ -213,5 +234,14 @@ public class NormalEnemy : Enemy
         {
             to.Add(p);
         }
+    }
+    bool ListContainsEnemy(List<Point> points)
+    {
+        foreach(Point p in points)
+        {
+            if(Map.Instance.getNodeAtPoint(p).value == 2)
+                return true;
+        }
+        return false;
     }
 }

@@ -16,7 +16,7 @@ public class ProcessedData : MonoBehaviour
     [SerializeField]
     const float ATK = 15;
     [SerializeField]
-    const float DEF = 2;
+    const float DEF = 20;
     [SerializeField]
     const int MOVE = 3;
     [SerializeField]
@@ -53,11 +53,11 @@ public class ProcessedData : MonoBehaviour
     }
     public void CalculateData()
     {
-        atk = atkDropsCount * ATK * (1 + (combo - 1) * 0.25f);
-        def = defDropsCount * DEF * (1 + (combo - 1) * 0.25f);
-        move = (int)((moveDropsCount/3) *(1 + (combo - 1) * 0.5f));
-        hp = hpDropsCount * HP * (1 + (combo - 1) * 0.25f);
-        sp = spDropsCount * SP * (1 + (combo - 1) * 0.25f);
+        atk = (int)((1 + (atkDropsCount - 3) * 0.25f) * ATK * (1 + (combo - 1) * 0.25f));
+        def = (int)((1 + (defDropsCount - 3) * 0.25f) * DEF * (1 + (combo - 1) * 0.25f));
+        move =(int)((1 + (moveDropsCount- 3) * 0.25f) *       (1 + (combo - 1) * 0.5f ));
+        hp =  (int)((1 + (hpDropsCount -  3) * 0.25f) * HP  * (1 + (combo - 1) * 0.25f));
+        sp =  (int)((1 + (spDropsCount -  3) * 0.25f) * SP  * (1 + (combo - 1) * 0.25f));
         move = Mathf.Clamp(move,0,10);
     }
 }

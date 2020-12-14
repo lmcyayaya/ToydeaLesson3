@@ -10,6 +10,7 @@ public class UIBar : MonoBehaviour
     public Image backGround;
     public Image back;
     public Image front;
+    [SerializeField]
     public GameObject effect;
     [HideInInspector]
     public float CurrentAmount
@@ -22,17 +23,19 @@ public class UIBar : MonoBehaviour
         {
             if(value!=currentAmount)
             {
-                currentAmount = value;
-                HPDoFillAmount();
-                if(value <currentAmount)
+                if(value < currentAmount)
                     if(effect!=null)
                         effect.SetActive(true);
+
+                currentAmount = value;
+                currentAmount = Mathf.Clamp(currentAmount,0,maxAmount);
+                HPDoFillAmount();
+                
             }
         }
     }
     protected float currentAmount;
     protected float maxAmount;
-    
     void HPDoFillAmount()
     {
         front.DOFillAmount(CurrentAmount/maxAmount,0.4f).SetEase(Ease.OutQuart).OnComplete(()=>

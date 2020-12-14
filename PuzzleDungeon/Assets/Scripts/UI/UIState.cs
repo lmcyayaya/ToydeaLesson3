@@ -19,7 +19,7 @@ public class UIState : MonoBehaviour
             {
                 stateManagerState = value;
                 if(stateManagerState == StateManager.State.myTurn)
-                    ChangeState("準備OK");
+                    ChangeState("準備完了");
                 else if(stateManagerState == StateManager.State.turning)
                     ChangeState("パズル中");
                 else if(stateManagerState == StateManager.State.enemyTurn)

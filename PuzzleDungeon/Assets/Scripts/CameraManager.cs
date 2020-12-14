@@ -20,17 +20,17 @@ public class CameraManager : MonoBehaviour
 
     void FixedUpdate()
     {
-        mainCamera.orthographicSize = Mathf.Lerp(mainCamera.orthographicSize,targetSize,0.2f);
-        
         if( Input.GetAxis("Mouse ScrollWheel") < 0 )
         {
             targetSize += zoomSpeed * Time.deltaTime;
+            targetSize = Mathf.Clamp(targetSize,2,5);
         }
         else if( Input.GetAxis("Mouse ScrollWheel") > 0 )
         {
             targetSize -= zoomSpeed * Time.deltaTime;
         }
-        mainCamera.orthographicSize = Mathf.Clamp(mainCamera.orthographicSize,2,5);
+        targetSize = Mathf.Clamp(targetSize,2,5);
+        mainCamera.orthographicSize = Mathf.Lerp(mainCamera.orthographicSize,targetSize,0.2f);
         mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position,player.transform.position+(pivot * mainCamera.orthographicSize / 2 ),0.7f);
         // if ((Input.touchCount  ==2) && (Input.GetTouch(0).phase == TouchPhase.Moved || Input.GetTouch(1).phase == TouchPhase.Moved))
         // {

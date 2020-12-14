@@ -199,7 +199,7 @@ public class Player : MonoBehaviour
                 if(/*Map.Instance.getNodeAtPoint(next).value == 0 ||*/Map.Instance.getNodeAtPoint(next).value == 2 )
                     canAttackList.Add(next);
             }
-            ChangeGridColor(canAttackList,Color.red);
+            ChangeGridColor(canAttackList,Color.green);
             attackReady = true;
         }
         else

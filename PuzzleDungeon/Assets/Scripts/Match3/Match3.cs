@@ -94,6 +94,8 @@ public class Match3 : MonoBehaviour
             {
                 StateManager.Instance.state = StateManager.State.enemyTurn;
             }
+            PlayerData.Instance.currentSP += ProcessedData.Instance.sp;
+            PlayerData.Instance.currentHP += ProcessedData.Instance.hp;
             time = turningTime;
             return;
         }
@@ -646,13 +648,30 @@ public class Match3 : MonoBehaviour
         }
         return line;
     }
+    public List<Node> getNodesOfValue(int i)
+    {
+        List<Node> nodes = new List<Node>();
+        foreach(Node node in board)
+        {
+            if(node.value == i)
+            {
+                nodes.Add(node);
+            }
+        }
+        return nodes;
+    }
+    public void ForSkillChangePieceSprite(Point p,int value)
+    {
+        getNodeAtPoint(p).getPiece().RestSprite(pieces[value - 1]);
+    }
+
 
 }
 
 [System.Serializable]
 public class Node
 {
-    public int value; //0 = blank, 1 = cube, 2 = sphere, 3 = cylinder, 4 = pryamid, 5 = diamond, -1 = hole
+    public int value; //0 = blank, 1 = atk, 2 = def, 3 = move, 4 = hp, 5 = sp, -1 = hole
     public Point index;
     NodePiece piece;
 
