@@ -50,6 +50,7 @@ public class Map : MonoBehaviour
                     {
                         mapBoard[x, y] = new MapNode(piece.value, new Point(x, y));
                         mapBoard[x, y].SetPiece(piece);
+                        mapBoard[x, y].getPiece().FirstTime();
                         hasOnMap.Remove(piece);
                         break;
                     }   
@@ -74,6 +75,7 @@ public class Map : MonoBehaviour
                 Transform rect = p.GetComponent<Transform>();
                 rect.position = new Vector2(transform.position.x + (cellSize * x)+cellSize/2, transform.position.y - (cellSize * y)-cellSize/2);
                 node.SetPiece(piece);
+                node.getPiece().FirstTime();
                 
             }
         }
@@ -81,6 +83,11 @@ public class Map : MonoBehaviour
     public MapNode getNodeAtPoint(Point p)
     {
         return mapBoard[p.x, p.y];
+    }
+    public void SetNewValueToNord(Point p,int value)
+    {
+        getNodeAtPoint(p).getPiece().value = value;
+        getNodeAtPoint(p).value = value;
     }
     public void SwitchNodePieceAndValue(Point a,Point b)
     {

@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class UIPlayerHPBar : UIBar
 {
+    public int attackType;
+    public GameObject[] effects;
     Text text;
     void Start()
     {
@@ -22,5 +24,10 @@ public class UIPlayerHPBar : UIBar
                 effect.SetActive(false);
         text.text = currentAmount+" / "+maxAmount;
 
+    }
+    protected override void HurtEffect()
+    {
+        if(effects.Length != 0 && attackType < effects.Length)
+            effects[attackType].SetActive(true);
     }
 }

@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 public class UISkip : MonoBehaviour
 {
+    public Match3 game;
     Image image;
     Button button;
     Text text;
@@ -19,14 +20,14 @@ public class UISkip : MonoBehaviour
 
     void Update()
     {
-        if(StateManager.Instance.state != StateManager.State.action)
+        if(StateManager.Instance.state != StateManager.State.action && StateManager.Instance.state != StateManager.State.turning)
         {
             button.interactable = false;
             image.raycastTarget = false;
             image.color = new Color(0,0,0,0);
             text.color = new Color(0,0,0,0);
         }
-        else if(StateManager.Instance.state == StateManager.State.action)
+        else
         {
             button.interactable = true;
             image.raycastTarget = true;
@@ -37,6 +38,12 @@ public class UISkip : MonoBehaviour
     }
     public void SkipButton()
     {
+        if(StateManager.Instance.state == StateManager.State.turning)
+        {
+            game.time = 0;
+            return;
+        }
+
         if(Player.Instance.playerState == Player.PlayerState.attack)
         {
             Player.Instance.hasAttacked = true;

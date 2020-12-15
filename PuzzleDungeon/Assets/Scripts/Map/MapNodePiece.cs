@@ -15,6 +15,10 @@ public class MapNodePiece : MonoBehaviour
     {
         sprite = GetComponent<SpriteRenderer>();
     }
+    public void FirstTime()
+    {
+        sprite.color = new Color(lastColor.r,lastColor.g,lastColor.b,0);
+    }
 
     public void SetIndex(Point p)
     {
@@ -26,7 +30,12 @@ public class MapNodePiece : MonoBehaviour
     }
     public void SetColor(Color color)
     {
-        
+        lastColor = sprite.color;
+        sprite.color = color;
+    }
+    public void BackToLastColor()
+    {
+        sprite.color = lastColor;
     }
     public void ResetPosition()
     {

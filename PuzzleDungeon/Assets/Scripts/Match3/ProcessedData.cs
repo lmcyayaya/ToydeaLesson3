@@ -59,5 +59,11 @@ public class ProcessedData : MonoBehaviour
         hp =  (int)((1 + (hpDropsCount -  3) * 0.25f) * HP  * (1 + (combo - 1) * 0.25f));
         sp =  (int)((1 + (spDropsCount -  3) * 0.25f) * SP  * (1 + (combo - 1) * 0.25f));
         move = Mathf.Clamp(move,0,10);
+        if(defDropsCount == 0)
+            def = 0;
+        if(hpDropsCount == 0)
+            hp = 0;
+        if(spDropsCount == 0)
+            sp = 0;
     }
 }

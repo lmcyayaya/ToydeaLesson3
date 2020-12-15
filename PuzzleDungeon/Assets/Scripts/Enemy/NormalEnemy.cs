@@ -6,11 +6,12 @@ using DG.Tweening;
 public class NormalEnemy : Enemy
 {
     public int detectDis;
+    public int moveTimes;
     bool hasAround;
     MapNodePiece piece;
     Color oriColor;
     SpriteRenderer sprite;
-    SpriteRenderer attackNode;
+    MapNodePiece attackNode;
     Point oriPoint;
     List<Point> moveList;
     List<List<Point>> moveListList;
@@ -30,7 +31,7 @@ public class NormalEnemy : Enemy
     {
         if(attackNode != null)
         {
-            attackNode.color = Color.white;
+            attackNode.SetColor(Color.white);
             attackNode = null;
         }
         hasAround = false;
@@ -38,8 +39,8 @@ public class NormalEnemy : Enemy
         if(dir != null)
         {
             AttackPlayer();
-            attackNode = Map.Instance.getNodeAtPoint(Player.Instance.index).getPiece().GetComponent<SpriteRenderer>();
-            attackNode.color = Color.red;
+            attackNode = Map.Instance.getNodeAtPoint(Player.Instance.index).getPiece();
+            attackNode.SetColor(Color.red);
             if(dir.Equals(Point.up))
                 transform.rotation = Quaternion.Euler(Vector3.forward * 180);
             else if(dir.Equals(Point.down))
@@ -48,7 +49,6 @@ public class NormalEnemy : Enemy
                 transform.rotation = Quaternion.Euler(Vector3.forward * -90);
             else if(dir.Equals(Point.left))
                 transform.rotation = Quaternion.Euler(Vector3.forward * 90);
-
                 return;
         }
 
@@ -59,8 +59,10 @@ public class NormalEnemy : Enemy
             moveList.Clear();
             FindTheWay(detectDis,piece.index,Player.Instance.index);
             FindTheLowestPath();
-            if(moveList.Count !=0)
+
+            if(moveList.Count != 0)
                 Move(moveList[0]);
+
             moveListList.Clear();
             sprite.color = Color.red;
             
@@ -74,7 +76,6 @@ public class NormalEnemy : Enemy
     }
     void AttackPlayer()
     {
-        sprite.color = Color.red;
         PlayerData.Instance.currentHP -= (atk-ProcessedData.Instance.def);
     }
     void DetectPlayer(int moveAmount,Point p)
@@ -135,23 +136,23 @@ public class NormalEnemy : Enemy
         
         piece.transform.parent = null;
         Map.Instance.SwitchNodePieceAndValue(piece.index,p);
+        var tmp = target.transform.position;
+        
         transform.DOMove(target.transform.position,0.2f).OnComplete(()=>
         {
-            
+            piece.transform.parent = transform;
             piece.transform.localPosition = Vector3.zero;
-            //hasMoveList.Add(p);
 
             if(CheckBeside() != null)
             {
-                Debug.Log("In");
-
-                attackNode = Map.Instance.getNodeAtPoint(Player.Instance.index).getPiece().GetComponent<SpriteRenderer>();
-                attackNode.color = Color.red;
+                attackNode = Map.Instance.getNodeAtPoint(Player.Instance.index).getPiece();
+                attackNode.SetColor(Color.red);
             }
             
         });
         target.transform.position = piece.transform.position;
-        piece.transform.parent = transform;
+        piece.transform.position = tmp;
+        
     }
     void FindTheWay(int detectDis,Point startPoint,Point endPoint)
     {
@@ -178,6 +179,7 @@ public class NormalEnemy : Enemy
                 moveList.Add(next);
                 if(next.x == endPoint.x && next.y == endPoint.y)
                 {
+                    //moveList.Remove(next);
                     moveListList.Add(new List<Point>());
                     CopyList(moveList,moveListList[moveListList.Count-1]);
                 }

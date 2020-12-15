@@ -15,7 +15,7 @@ public class Match3 : MonoBehaviour
     public GameObject nodePiece;
     public Image timeLine;
     public float turningTime; 
-    float time;
+    public float time;
     int width = 13;
     int height = 13;
     int[] fills;
@@ -36,7 +36,6 @@ public class Match3 : MonoBehaviour
         timeLine.fillAmount = time / turningTime;
         if(time <= 0 )
         {
-            
             MovePieces.Instance.DropPiece();
             ResetAllPiecePosNow();
             StateManager.Instance.state = StateManager.State.matching;

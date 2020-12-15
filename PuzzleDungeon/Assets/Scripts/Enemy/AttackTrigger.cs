@@ -6,24 +6,32 @@ public class AttackTrigger : MonoBehaviour
 {
     public enum AttackMode
     {
-        ShortDistanceAttack,LaserAttack,MinesAttack
+        CutAttack,LaserAttack,MinesAttack,MidDistanceAttack,CreatWall
     }
     public AttackMode attackMode;
     public float atk;
     public Point index;
-    public bool playerInhere;
-    public bool minesOn;
+    public bool playerInHere;
+    Boss boss;
+    void Start() 
+    {
+        boss = GetComponentInParent<Boss>();
+    }
     void Update()
     {
         if(Player.Instance.transform.position == transform.position)
         {
-            if(minesOn)
-                PlayerData.Instance.currentHP -= atk;
-            playerInhere = true;
+            playerInHere = true;
+            if(!boss.playerInNow.Contains(this))
+                boss.playerInNow.Add(this);
+        }   
+        else
+        {
+            playerInHere = false;
+            if(boss.playerInNow.Contains(this))
+                boss.playerInNow.Remove(this);
         }
             
-        else
-            playerInhere = false;
         if(index.x == 0 && index.y == 0)
         {
             RaycastHit2D hit =  Physics2D.Raycast(transform.position + Vector3.forward*0.01f,Vector3.forward);

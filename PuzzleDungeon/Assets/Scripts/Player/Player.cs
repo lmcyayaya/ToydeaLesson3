@@ -39,6 +39,7 @@ public class Player : MonoBehaviour
         canMoveList = new List<Point>();
         moveListList = new List<List<Point>>();
         canAttackList = new List<Point>();
+        
     }
 
     public void ActionUpdate()
@@ -76,7 +77,7 @@ public class Player : MonoBehaviour
                     if(ProcessedData.Instance.move <= 0)
                     {
                         actionState += 1;
-                        ChangeGridColor(canMoveList,Color.white);
+                        ResetGridColor(canMoveList);
                         moveListList.Clear();
                         canMoveList.Clear();
                         playerState = PlayerState.attack;
@@ -96,7 +97,7 @@ public class Player : MonoBehaviour
                     {
                         actionState += 1;
                         playerState = PlayerState.move;
-                        ChangeGridColor(canAttackList,Color.white);
+                        ResetGridColor(canAttackList);
                         canAttackList.Clear();
                         attackReady = false;
                         hasAttacked = false;
@@ -114,7 +115,7 @@ public class Player : MonoBehaviour
                     if(ProcessedData.Instance.move <= 0)
                     {
                         actionState = 0;
-                        ChangeGridColor(canMoveList,Color.white);
+                        ResetGridColor(canMoveList);
                         moveListList.Clear();
                         canMoveList.Clear();
                         StateManager.Instance.state = StateManager.State.enemyTurn;
@@ -135,7 +136,7 @@ public class Player : MonoBehaviour
                     {
                         actionState = 0;
                         StateManager.Instance.state = StateManager.State.enemyTurn;
-                        ChangeGridColor(canAttackList,Color.white);
+                        ResetGridColor(canAttackList);
                         canAttackList.Clear();
                         attackReady = false;
                         hasAttacked = false;
@@ -155,7 +156,7 @@ public class Player : MonoBehaviour
             canMoveList.Add(index);
             FindCanMovePoints(Mathf.Clamp(ProcessedData.Instance.move,0,5),index);
             canMoveList.Remove(index);
-            ChangeGridColor(canMoveList,Color.red);
+            ChangeGridColor(canMoveList,Color.green);
             uiState.ChangeState("移動選択");
         }
         else
@@ -171,7 +172,7 @@ public class Player : MonoBehaviour
                 FindTheLowestPath();
                 Move(moveList,0);
                 ProcessedData.Instance.move -= moveList.Count;
-                ChangeGridColor(canMoveList,Color.white);
+                ResetGridColor(canMoveList);
                 moveListList.Clear();
                 canMoveList.Clear();
 
@@ -214,9 +215,11 @@ public class Player : MonoBehaviour
                     return;
                 if(!Map.Instance.isContainPointInPointList(canAttackList,piece.index))
                     return;
-
-
-                piece.GetComponentInParent<Enemy>().currentHP -= ProcessedData.Instance.atk;
+                var boss = piece.GetComponentInParent<Boss>();
+                if(boss != null && boss.currentWeakPoint == piece )
+                    boss.currentHP -= ProcessedData.Instance.atk * 2;
+                else
+                    piece.GetComponentInParent<Enemy>().currentHP -= ProcessedData.Instance.atk;
 
                 hasAttacked = true;
             }
@@ -317,9 +320,63 @@ public class Player : MonoBehaviour
             }
         }
     }
+    public void DetectMap(int moveAmount,Point p)
+    {
+        if(moveAmount == 0)
+            return;
+
+        Point[] directions =
+        {
+            Point.up,
+            Point.right,
+            Point.down,
+            Point.left
+        };
+        foreach(Point dir in directions)
+        {
+            Point next = Point.add(p,dir);
+            if(next.x >= Map.Instance.width || next.y >= Map.Instance.height || next.x < 0 || next.y < 0) 
+                continue;
+            
+            if(Map.Instance.getNodeAtPoint(next).value == 0)
+            {
+                MapNodePiece piece = Map.Instance.getNodeAtPoint(next).getPiece();
+                Color tmp = piece.sprite.color;
+                piece.sprite.color = new Color(tmp.r,tmp.g,tmp.b,1);
+
+                DetectMap(moveAmount -1 , next);
+                continue;
+            }
+            else if(Map.Instance.getNodeAtPoint(next).value == 1)
+            {
+                MapNodePiece piece = Map.Instance.getNodeAtPoint(next).getPiece();
+                Color tmp = piece.sprite.color;
+                piece.sprite.color = new Color(tmp.r,tmp.g,tmp.b,1);
+
+                continue;
+            }   
+            else if(Map.Instance.getNodeAtPoint(next).value == 2)
+            {
+                MapNodePiece piece = Map.Instance.getNodeAtPoint(next).getPiece();
+                Color tmp = piece.sprite.color;
+                piece.sprite.color = new Color(tmp.r,tmp.g,tmp.b,1);
+                NormalEnemy enemy = piece.GetComponentInParent<NormalEnemy>();
+                if(enemy!=null)
+                {
+                    SpriteRenderer sprite = enemy.GetComponent<SpriteRenderer>();
+                    Color tmp2 = sprite.color;
+                    sprite.color = new Color(tmp2.r,tmp2.g,tmp2.b,1);
+                }
+                    
+                continue;
+            }
+        }
+        
+    }
     void Move(List<Point> path,int i)
     {
         moving = true;
+        
         if(i > 0)
         {
             if(Mathf.Abs(path[i].x - path[i-1].x) == 0)
@@ -358,7 +415,7 @@ public class Player : MonoBehaviour
         transform.DOMove(Map.Instance.getNodeAtPoint(path[i]).getPiece().transform.position,0.2f).OnComplete(()=>
         {
             index = path[i];
-            
+            DetectMap(5,index);
             if( i+1 < path.Count)
                Move(path,i+1);
             else
@@ -376,7 +433,14 @@ public class Player : MonoBehaviour
     {
         foreach(Point p in list)
         {
-            Map.Instance.getNodeAtPoint(p).getPiece().transform.GetComponent<SpriteRenderer>().color = color;
+            Map.Instance.getNodeAtPoint(p).getPiece().SetColor(color);
+        }
+    }
+    void ResetGridColor(List<Point> list)
+    {
+        foreach(Point p in list)
+        {
+            Map.Instance.getNodeAtPoint(p).getPiece().BackToLastColor();
         }
     }
 }

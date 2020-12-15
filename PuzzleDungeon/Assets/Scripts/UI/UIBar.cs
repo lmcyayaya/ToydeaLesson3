@@ -10,7 +10,6 @@ public class UIBar : MonoBehaviour
     public Image backGround;
     public Image back;
     public Image front;
-    [SerializeField]
     public GameObject effect;
     [HideInInspector]
     public float CurrentAmount
@@ -24,8 +23,7 @@ public class UIBar : MonoBehaviour
             if(value!=currentAmount)
             {
                 if(value < currentAmount)
-                    if(effect!=null)
-                        effect.SetActive(true);
+                    HurtEffect();
 
                 currentAmount = value;
                 currentAmount = Mathf.Clamp(currentAmount,0,maxAmount);
@@ -57,5 +55,10 @@ public class UIBar : MonoBehaviour
             back.DOFade(1,0);
             front.DOFade(1,0);
         }
+    }
+    protected virtual void HurtEffect()
+    {
+        if(effect!=null)
+            effect.SetActive(true);
     }
 }

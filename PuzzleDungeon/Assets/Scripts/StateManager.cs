@@ -23,6 +23,7 @@ public class StateManager : MonoBehaviour
     public Boss boss;
     public bool testBoolEnableEnemys;
     bool enemyHasAction;
+    bool firstTime = false;
     Match3 game;
     void Awake() 
     {
@@ -40,6 +41,11 @@ public class StateManager : MonoBehaviour
         {
             case State.myTurn :
             {
+                if(!firstTime)
+                {
+                    firstTime = true;
+                    Player.Instance.DetectMap(5,Player.Instance.index);
+                }
                 enemyHasAction = false;
                 break;
             }
