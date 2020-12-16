@@ -15,5 +15,9 @@ public class Enemy : MonoBehaviour
     {
 
     }
+    public virtual void Dead()
+    {
+        
+    }
 
 }

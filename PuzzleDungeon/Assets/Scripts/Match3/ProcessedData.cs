@@ -13,17 +13,6 @@ public class ProcessedData : MonoBehaviour
     }
     static ProcessedData instance;
 
-    [SerializeField]
-    const float ATK = 15;
-    [SerializeField]
-    const float DEF = 20;
-    [SerializeField]
-    const int MOVE = 3;
-    [SerializeField]
-    const float HP = 10;
-    [SerializeField]
-    const float SP = 5;
-
     public int atkDropsCount;
     public int defDropsCount;
     public int moveDropsCount;
@@ -53,11 +42,11 @@ public class ProcessedData : MonoBehaviour
     }
     public void CalculateData()
     {
-        atk = (int)((1 + (atkDropsCount - 3) * 0.25f) * ATK * (1 + (combo - 1) * 0.25f));
-        def = (int)((1 + (defDropsCount - 3) * 0.25f) * DEF * (1 + (combo - 1) * 0.25f));
-        move =(int)((1 + (moveDropsCount- 3) * 0.25f) *       (1 + (combo - 1) * 0.5f ));
-        hp =  (int)((1 + (hpDropsCount -  3) * 0.25f) * HP  * (1 + (combo - 1) * 0.25f));
-        sp =  (int)((1 + (spDropsCount -  3) * 0.25f) * SP  * (1 + (combo - 1) * 0.25f));
+        atk = (int)((1 + (atkDropsCount - 3) * 0.25f) * PlayerData.Instance.ATK * (1 + (combo - 1) * 0.25f));
+        def = (int)((1 + (defDropsCount - 3) * 0.25f) * PlayerData.Instance.DEF * (1 + (combo - 1) * 0.25f));
+        move =(int)((1 + (moveDropsCount- 3) * 0.25f) * PlayerData.Instance.MOVE* (1 + (combo - 1) * 0.5f ));
+        hp =  (int)((1 + (hpDropsCount -  3) * 0.25f) * PlayerData.Instance.HP  * (1 + (combo - 1) * 0.25f));
+        sp =  (int)((1 + (spDropsCount -  3) * 0.25f) * PlayerData.Instance.SP  * (1 + (combo - 1) * 0.25f));
         move = Mathf.Clamp(move,0,10);
         if(defDropsCount == 0)
             def = 0;

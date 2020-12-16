@@ -612,6 +612,15 @@ public class Match3 : MonoBehaviour
             }
         }
     }
+    public bool isCurrentBoardContainDrops(int value)
+    {
+        foreach(Node node in board)
+        {
+            if(node.value == value)
+                return true;
+        }
+        return false;
+    }
     public Node getNodeAtPoint(Point p)
     {
         return board[p.x, p.y];

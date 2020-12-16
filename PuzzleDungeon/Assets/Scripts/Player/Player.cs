@@ -164,8 +164,16 @@ public class Player : MonoBehaviour
             if(Input.GetMouseButtonDown(0))
             {
                 var hit = Physics2D.Raycast(new Vector2(Camera.main.ScreenToWorldPoint(Input.mousePosition).x,Camera.main.ScreenToWorldPoint(Input.mousePosition).y), Vector2.zero, 0f);
-                MapNodePiece piece =  hit.transform.GetComponent<MapNodePiece>();
-                if(!Map.Instance.isContainPointInPointList(canMoveList,piece.index) || piece == null)
+                MapNodePiece piece = null;
+                if(hit.transform != null)
+                {
+                    piece =  hit.transform.GetComponent<MapNodePiece>();
+                }
+                else
+                    return;
+                if(piece==null)
+                    return;
+                if(!Map.Instance.isContainPointInPointList(canMoveList,piece.index))
                     return;
                 moveList.Clear();
                 FindTheWay(Mathf.Clamp(ProcessedData.Instance.move,0,5),index,piece .index);
@@ -219,7 +227,13 @@ public class Player : MonoBehaviour
                 if(boss != null && boss.currentWeakPoint == piece )
                     boss.currentHP -= ProcessedData.Instance.atk * 2;
                 else
-                    piece.GetComponentInParent<Enemy>().currentHP -= ProcessedData.Instance.atk;
+                {
+                    Enemy enemy = piece.GetComponentInParent<Enemy>();
+                    enemy.currentHP -= ProcessedData.Instance.atk;
+                    enemy.Dead();
+
+                }
+                    
 
                 hasAttacked = true;
             }

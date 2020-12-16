@@ -22,6 +22,7 @@ public class UIBar : MonoBehaviour
         {
             if(value!=currentAmount)
             {
+                
                 if(value < currentAmount)
                     HurtEffect();
 
@@ -40,21 +41,6 @@ public class UIBar : MonoBehaviour
         {
             back.DOFillAmount(CurrentAmount/maxAmount,0.3f).SetEase(Ease.OutQuart);
         });
-    }
-    protected void ShowUI()
-    {
-        if(StateManager.Instance.state != StateManager.State.action)
-        {
-            backGround.DOFade(0,0);
-            back.DOFade(0,0);
-            front.DOFade(0,0);
-        }
-        else
-        {
-            backGround.DOFade(1,0);
-            back.DOFade(1,0);
-            front.DOFade(1,0);
-        }
     }
     protected virtual void HurtEffect()
     {

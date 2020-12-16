@@ -12,10 +12,35 @@ public class PlayerData : MonoBehaviour
         }
     }
     static PlayerData instance;
+    public int CurrentLevel
+    {
+        get 
+        {
+            return currentLevel;
+        }
+        set
+        {
+            if(value > currentLevel)
+            {
+                currentLevel = value;
+                remainPoint += 3;
+            }
+        }
+            
+    }
+    private int currentLevel;
+    public int currentExp;
+    public int remainPoint;
     public float maxHP;
     public float currentHP;
     public float maxSP;
     public float currentSP;
+    public float ATK;
+    public float DEF;
+    public int MOVE;
+    public float HP;
+    public float SP;
+
     void Awake()
     {
         instance = this;   
@@ -27,6 +52,7 @@ public class PlayerData : MonoBehaviour
     }
     void Update()
     {
+        CurrentLevel = (currentExp + 80) / 80;
         currentSP = Mathf.Clamp(currentSP,0,maxSP);
         currentHP = Mathf.Clamp(currentHP,0,maxHP);
     }

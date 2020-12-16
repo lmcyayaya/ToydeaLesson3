@@ -15,13 +15,13 @@ public class StateManager : MonoBehaviour
     static StateManager instance;
     public enum State
     {
-        myTurn,turning,matching,dropping,action,enemyTurn
+        myTurn,turning,matching,dropping,action,enemyTurn,pause
     }
     public State state;
 
-    public Enemy[] enemys;
+    public NormalEnemy[] enemys;
     public Boss boss;
-    public bool testBoolEnableEnemys;
+    int mostTimes = 0;
     bool enemyHasAction;
     bool firstTime = false;
     Match3 game;
@@ -80,15 +80,36 @@ public class StateManager : MonoBehaviour
                 }
                 else
                 {
-                    if(testBoolEnableEnemys)
-                        foreach(Enemy enemy in enemys)
+                   
+                    foreach(NormalEnemy enemy in enemys)
+                    {
+                        if(enemy.GetComponent<SpriteRenderer>().color.a >= 1)
                         {
                             enemy.EnemyNeedToDO();
+                            if(enemy.moveTimes > mostTimes)
+                                mostTimes = enemy.moveTimes ;
                         }
-                    state = State.myTurn;
+                            
+                    }
+                    StartCoroutine(WaitToDo(mostTimes*0.2f,()=> state = State.myTurn)); 
                 }
                 
                 break;
+            }
+            case State.pause :
+            {
+                break;
+            }
+        }
+    }
+    void EnemyAlpha()
+    {
+        foreach(Enemy enemy in enemys)
+        {
+            var sprite = enemy.GetComponent<SpriteRenderer>();
+            if(sprite != null)
+            {
+                sprite.color -= new Color(0,0,0,1);
             }
         }
     }
