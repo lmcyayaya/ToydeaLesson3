@@ -114,7 +114,7 @@ public class Map : MonoBehaviour
 [System.Serializable]
 public class MapNode
 {
-    public int value; //0 = road, 1 = wall
+    public int value; //0 = road, 1 = wall,2 = enemy
     public Point index;
 
     MapNodePiece piece;

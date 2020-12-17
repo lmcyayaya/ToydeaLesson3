@@ -24,11 +24,18 @@ public class PlayerData : MonoBehaviour
             {
                 currentLevel = value;
                 remainPoint += 3;
+                levelUpHint.FadeIn();
             }
         }
             
     }
-    private int currentLevel;
+    int currentLevel;
+    public UIBreathFade levelUpHint;
+    
+    public bool isPoision;
+    public int times;
+    public int poisonDamage;
+
     public int currentExp;
     public int remainPoint;
     public float maxHP;
@@ -40,6 +47,7 @@ public class PlayerData : MonoBehaviour
     public int MOVE;
     public float HP;
     public float SP;
+    bool doOnce;
 
     void Awake()
     {
@@ -55,5 +63,50 @@ public class PlayerData : MonoBehaviour
         CurrentLevel = (currentExp + 80) / 80;
         currentSP = Mathf.Clamp(currentSP,0,maxSP);
         currentHP = Mathf.Clamp(currentHP,0,maxHP);
+
+        switch(StateManager.Instance.state)
+        {
+            case StateManager.State.myTurn:
+            {
+                if(isPoision)
+                {
+                    if(!doOnce)
+                    {
+                        doOnce = true;
+                        currentHP -= poisonDamage;
+                        ShowDamageText();
+                        times -= 1;
+                        if(times == 0)
+                        {
+                            isPoision = false;
+                        }
+                    }
+                }
+                break;
+            }
+            case StateManager.State.enemyTurn:
+            {
+                doOnce = false;
+                break;
+            }
+        }
+
+
+
+
+
+
+
+
+
+    }
+    void ShowDamageText()
+    {
+        var damageText = ObjectPool.TakeFromPool("Damage");
+        var uiDamage = damageText.GetComponent<UINumberPopUp>();
+        damageText.position = Player.Instance.transform.position;
+        float damage = poisonDamage;
+        uiDamage.amount = damage;
+        uiDamage.ShowDamage();
     }
 }

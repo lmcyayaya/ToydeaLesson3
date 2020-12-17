@@ -13,6 +13,7 @@ public class MovePieces : MonoBehaviour
     }
     static MovePieces instance;
     public Canvas canvas;
+    public RectTransform selectBox;
     Match3 game;
     NodePiece selectedPiece;
     List<NodePiece> moving;
@@ -40,7 +41,9 @@ public class MovePieces : MonoBehaviour
             RectTransform rect = selectedPiece.rect.parent.GetComponent<RectTransform>();
             Vector2 nPos = Vector2.zero;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(rect,Input.mousePosition,canvas.worldCamera,out nPos);
-
+            //selectedPiece.rect.anchoredPosition = nPos;
+            selectBox.position = selectedPiece.rect.position;
+            
             //becaus the anchor preset of the piece is top Left ,so need to  minus (board width /2) 因為珠子的錨點在左上角所以要減去盤面的一半
             float disX = nPos.x + rect.sizeDelta.x/2 - startPos.x;
             float disY = nPos.y - rect.sizeDelta.y/2 - startPos.y;
@@ -226,6 +229,7 @@ public class MovePieces : MonoBehaviour
         }
         
         selectedPiece = null;
+        selectBox.anchoredPosition = new Vector2(-432,0);
 
         if (moving == null || moveAmount == 0)
         {

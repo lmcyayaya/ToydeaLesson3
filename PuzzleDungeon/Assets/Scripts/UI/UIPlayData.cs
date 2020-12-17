@@ -63,6 +63,8 @@ public class UIPlayData : MonoBehaviour
     }
     public void OpenPage()
     {
+        if(StateManager.Instance.state != StateManager.State.myTurn)
+            return;
         if(tween!=null)
         {
             tween.Kill();

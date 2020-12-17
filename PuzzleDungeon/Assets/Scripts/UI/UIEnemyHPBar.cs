@@ -27,9 +27,13 @@ public class UIEnemyHPBar : UIBar
     {
         enemy = GetComponentInParent<Enemy>();   
         sprite = enemy.transform.GetComponent<SpriteRenderer>();
-        backGround.color = backGround.color - new Color(0,0,0,1);
-        back.color = back.color - new Color(0,0,0,1) ;
-        front.color = front.color - new Color(0,0,0,1);
+        if(sprite!=null)
+        {
+            backGround.color = backGround.color - new Color(0,0,0,1);
+            back.color = back.color - new Color(0,0,0,1) ;
+            front.color = front.color - new Color(0,0,0,1);
+        }
+        
     }
     void Update()
     {
@@ -43,7 +47,7 @@ public class UIEnemyHPBar : UIBar
             if(!effect.GetComponent<ParticleSystem>().IsAlive())
                 effect.SetActive(false);
     }
-    void ShowUI()
+    public void ShowUI()
     {
         if(sprite.color.a == 0)
         {

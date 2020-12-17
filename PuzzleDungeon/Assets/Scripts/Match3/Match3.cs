@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class Match3 : MonoBehaviour
 {
@@ -93,8 +94,29 @@ public class Match3 : MonoBehaviour
             {
                 StateManager.Instance.state = StateManager.State.enemyTurn;
             }
-            PlayerData.Instance.currentSP += ProcessedData.Instance.sp;
-            PlayerData.Instance.currentHP += ProcessedData.Instance.hp;
+
+            if(ProcessedData.Instance.sp > 0)
+            {
+                var spText = ObjectPool.TakeFromPool("SP");
+                spText.position = Player.Instance.transform.position;
+                var ui = spText.GetComponent<UINumberPopUp>();
+                ui.amount = ProcessedData.Instance.sp;
+                ui.ShowSp();
+                PlayerData.Instance.currentSP += ProcessedData.Instance.sp;
+            }
+            
+
+            if(ProcessedData.Instance.hp > 0)
+            {
+                var hpText = ObjectPool.TakeFromPool("HP");
+                hpText.position = Player.Instance.transform.position;
+                var ui = hpText.GetComponent<UINumberPopUp>();
+                ui.amount = ProcessedData.Instance.hp;
+                ui.ShowHp();
+                
+                PlayerData.Instance.currentHP += ProcessedData.Instance.hp;
+            }
+            
             time = turningTime;
             return;
         }
@@ -263,17 +285,26 @@ public class Match3 : MonoBehaviour
                 NodePiece nodePiece =node.getPiece();
                 if(nodePiece!=null)
                 {
-                    nodePiece.gameObject.SetActive(false);
-                    dead.Add(nodePiece);
+                    nodePiece.transform.DORotate(Vector3.forward * 360,0.4f,RotateMode.WorldAxisAdd).SetEase(Ease.InQuart);
+                    nodePiece.transform.DOScale(Vector3.zero,0.4f).SetEase(Ease.InQuart).OnComplete(()=>
+                    {
+                        nodePiece.transform.localScale = Vector3.one;
+                        nodePiece.transform.rotation = Quaternion.Euler(Vector3.zero);
+                        nodePiece.gameObject.SetActive(false);
+                        dead.Add(nodePiece);
+                    });
+                    
+                    
                 }
                 node.SetPiece(null);
 
             }
             ProcessedData.Instance.combo += 1;
+            ProcessedData.Instance.CalculateData();
             if(comboList.IndexOf(pointList) == comboList.Count-1)
                 yield return null;
             else
-                yield return new WaitForSeconds(0.2f);
+                yield return new WaitForSeconds(0.25f);
         }
         clearing = false;
         ApplyGravityToBoard();

@@ -24,15 +24,15 @@ public class UISkip : MonoBehaviour
         {
             button.interactable = false;
             image.raycastTarget = false;
-            image.color = new Color(0,0,0,0);
-            text.color = new Color(0,0,0,0);
+            image.color = new Color(1,1,1,0);
+            text.color = new Color(1,1,1,0);
         }
         else
         {
             button.interactable = true;
             image.raycastTarget = true;
             image.color = Color.white;
-            text.color = Color.black;
+            text.color = Color.white;
         }
         
     }

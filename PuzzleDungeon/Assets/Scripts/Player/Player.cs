@@ -21,9 +21,10 @@ public class Player : MonoBehaviour
     public PlayerState playerState;
     public Point index;
     public UIState uiState;
+    public bool hasAttacked;
     bool moving;
     bool attackReady;
-    public bool hasAttacked;
+    bool clickOnce;
     int actionState;
     List<Point> canMoveList;
     List<Point> moveList;
@@ -161,8 +162,9 @@ public class Player : MonoBehaviour
         }
         else
         {
-            if(Input.GetMouseButtonDown(0))
+            if(Input.GetMouseButton(0) && !clickOnce)
             {
+                clickOnce = true;
                 var hit = Physics2D.Raycast(new Vector2(Camera.main.ScreenToWorldPoint(Input.mousePosition).x,Camera.main.ScreenToWorldPoint(Input.mousePosition).y), Vector2.zero, 0f);
                 MapNodePiece piece = null;
                 if(hit.transform != null)
@@ -184,6 +186,10 @@ public class Player : MonoBehaviour
                 moveListList.Clear();
                 canMoveList.Clear();
 
+            }
+            else if(!Input.GetMouseButton(0) && clickOnce)
+            {
+                clickOnce = false;
             }
         }
     }
@@ -209,14 +215,16 @@ public class Player : MonoBehaviour
                     canAttackList.Add(next);
             }
             ChangeGridColor(canAttackList,Color.green);
+            
             attackReady = true;
         }
         else
         {
             if(canAttackList.Count == 0)
                 hasAttacked = true;
-            if(Input.GetMouseButtonDown(0))
+            if(Input.GetMouseButton(0) && !clickOnce)
             {
+                clickOnce = true;
                 var hit = Physics2D.Raycast(new Vector2(Camera.main.ScreenToWorldPoint(Input.mousePosition).x,Camera.main.ScreenToWorldPoint(Input.mousePosition).y), Vector2.zero, 0f);
                 MapNodePiece piece =  hit.transform.GetComponent<MapNodePiece>();
                 if(piece == null)
@@ -229,13 +237,22 @@ public class Player : MonoBehaviour
                 else
                 {
                     Enemy enemy = piece.GetComponentInParent<Enemy>();
+                    var damageText = ObjectPool.TakeFromPool("Damage");
+                    damageText.position = enemy.transform.position;
+                    var ui = damageText.GetComponent<UINumberPopUp>();
+                    ui.amount = ProcessedData.Instance.atk;
+                    ui.ShowDamage();
                     enemy.currentHP -= ProcessedData.Instance.atk;
                     enemy.Dead();
 
                 }
-                    
-
+        
                 hasAttacked = true;
+
+            }
+            else if(!Input.GetMouseButton(0) && clickOnce)
+            {
+                clickOnce = false;
             }
 
         }
@@ -381,6 +398,16 @@ public class Player : MonoBehaviour
                     Color tmp2 = sprite.color;
                     sprite.color = new Color(tmp2.r,tmp2.g,tmp2.b,1);
                 }
+                else
+                {
+                    TreasureChestEnemy treasureChestEnemy = piece.GetComponentInParent<TreasureChestEnemy>();
+                    if(treasureChestEnemy!=null)
+                    {
+                        SpriteRenderer sprite = treasureChestEnemy.GetComponent<SpriteRenderer>();
+                        Color tmp2 = sprite.color;
+                        sprite.color = new Color(tmp2.r,tmp2.g,tmp2.b,1);
+                    }
+                }
                     
                 continue;
             }
@@ -447,6 +474,7 @@ public class Player : MonoBehaviour
     {
         foreach(Point p in list)
         {
+            Map.Instance.getNodeAtPoint(p).getPiece().transform.localPosition -= Vector3.forward;
             Map.Instance.getNodeAtPoint(p).getPiece().SetColor(color);
         }
     }
@@ -455,6 +483,7 @@ public class Player : MonoBehaviour
         foreach(Point p in list)
         {
             Map.Instance.getNodeAtPoint(p).getPiece().BackToLastColor();
+            Map.Instance.getNodeAtPoint(p).getPiece().transform.localPosition += Vector3.forward;
         }
     }
 }

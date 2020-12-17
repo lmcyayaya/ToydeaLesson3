@@ -222,6 +222,7 @@ public class Boss : Enemy
             }
 
             Map.Instance.SetNewValueToNord(attack.index,1);
+            Map.Instance.getNodeAtPoint(attack.index).getPiece().SetColor(new Color(1,1,1,0));
             attack.transform.DOScale(Vector3.one,0.3f).SetEase(Ease.OutBack).OnComplete(()=>
             {
                 if(creatWallAttack.IndexOf(attack) == creatWallAttack.Count-1)
@@ -241,6 +242,7 @@ public class Boss : Enemy
         {
             attack.transform.DOScale(Vector3.zero,0.3f).SetEase(Ease.InBack);
             Map.Instance.SetNewValueToNord(attack.index,0);
+            Map.Instance.getNodeAtPoint(attack.index).getPiece().BackToLastColor();
         }
     }
     void MinesReset()

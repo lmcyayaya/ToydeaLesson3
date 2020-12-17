@@ -20,6 +20,7 @@ public class StateManager : MonoBehaviour
     public State state;
 
     public NormalEnemy[] enemys;
+    public TreasureChestEnemy treasureChestEnemy;
     public Boss boss;
     int mostTimes = 0;
     bool enemyHasAction;
@@ -89,8 +90,8 @@ public class StateManager : MonoBehaviour
                             if(enemy.moveTimes > mostTimes)
                                 mostTimes = enemy.moveTimes ;
                         }
-                            
                     }
+                    treasureChestEnemy.EnemyNeedToDO();
                     StartCoroutine(WaitToDo(mostTimes*0.2f,()=> state = State.myTurn)); 
                 }
                 

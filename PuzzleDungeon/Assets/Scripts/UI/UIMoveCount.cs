@@ -20,13 +20,13 @@ public class UIMoveCount : MonoBehaviour
         if(Player.Instance.playerState == Player.PlayerState.move && StateManager.Instance.state == StateManager.State.action && ProcessedData.Instance.move > 0)
         {
             background.color = Color.white;
-            moveCount.color = Color.black;
+            moveCount.color = Color.white;
             moveCount.text = "あと"+ ProcessedData.Instance.move.ToString() + "歩";
         }
         else
         {
-            background.color = new Color(0,0,0,0);
-            moveCount.color = new Color(0,0,0,0);
+            background.color = new Color(1,1,1,0);
+            moveCount.color = new Color(1,1,1,0);
         }
             
         

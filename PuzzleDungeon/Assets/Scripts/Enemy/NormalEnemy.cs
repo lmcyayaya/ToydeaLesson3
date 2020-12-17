@@ -39,6 +39,11 @@ public class NormalEnemy : Enemy
             return;
         currentHP = 0;
         dead = true;
+        var expText = ObjectPool.TakeFromPool("EXP");
+        expText.position = transform.position;
+        var ui = expText.GetComponent<UINumberPopUp>();
+        ui.amount = exp;
+        ui.ShowExp(transform.position);
         PlayerData.Instance.currentExp += exp;
         piece.value = 0;
         Map.Instance.getNodeAtPoint(piece.index).value = 0;
@@ -67,7 +72,9 @@ public class NormalEnemy : Enemy
         {
             AttackPlayer();
             attackNode = Map.Instance.getNodeAtPoint(Player.Instance.index).getPiece();
+            attackNode.transform.localPosition -= Vector3.forward * 1.1f;
             attackNode.SetColor(Color.red);
+
             if(dir.Equals(Point.up))
                 transform.rotation = Quaternion.Euler(Vector3.forward * 180);
             else if(dir.Equals(Point.down))
@@ -76,7 +83,8 @@ public class NormalEnemy : Enemy
                 transform.rotation = Quaternion.Euler(Vector3.forward * -90);
             else if(dir.Equals(Point.left))
                 transform.rotation = Quaternion.Euler(Vector3.forward * 90);
-                return;
+
+            return;
         }
 
         DetectPlayer(detectDis,piece.index);
@@ -111,13 +119,21 @@ public class NormalEnemy : Enemy
     }
     void AttackPlayer()
     {
-        PlayerData.Instance.currentHP -= (atk-ProcessedData.Instance.def);
+        var damageText = ObjectPool.TakeFromPool("Damage");
+        var uiDamage = damageText.GetComponent<UINumberPopUp>();
+        damageText.position = Player.Instance.transform.position;
+        float damage = Mathf.Clamp((atk-ProcessedData.Instance.def),0,float.MaxValue);
+        uiDamage.amount = damage;
+        uiDamage.ShowDamage();
+
+        PlayerData.Instance.currentHP -= damage;
     }
     void CloseAttackPiece()
     {
         if(attackNode != null)
         {
             attackNode.SetColor(Color.white);
+            attackNode.transform.localPosition += Vector3.forward * 1.1f;
             attackNode = null;
         }
     }
@@ -189,6 +205,7 @@ public class NormalEnemy : Enemy
             if(CheckBeside() != null)
             {
                 attackNode = Map.Instance.getNodeAtPoint(Player.Instance.index).getPiece();
+                attackNode.transform.localPosition -= Vector3.forward*1.1f;
                 attackNode.SetColor(Color.red);
             }
             
@@ -223,6 +240,7 @@ public class NormalEnemy : Enemy
             if( CheckBeside() != null)
             {
                 attackNode = Map.Instance.getNodeAtPoint(Player.Instance.index).getPiece();
+                attackNode.transform.localPosition -= Vector3.forward;
                 attackNode.SetColor(Color.red);
             }
             return;
