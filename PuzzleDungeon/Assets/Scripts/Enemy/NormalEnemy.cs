@@ -55,7 +55,7 @@ public class NormalEnemy : Enemy
     {
         if(dead)
             return;
-
+        Debug.Log("EnemyAction");
         CloseAttackPiece();
         
         if(sprite.color.a == 1 && !hasBeenDetected)
@@ -65,7 +65,11 @@ public class NormalEnemy : Enemy
         }
         hasAround = false;
         if(!DetectDistance())
+        {
+            sprite.color = oriColor;
             return;
+        }
+            
 
         Point dir = CheckBeside();
         if(dir != null)
@@ -74,7 +78,7 @@ public class NormalEnemy : Enemy
             attackNode = Map.Instance.getNodeAtPoint(Player.Instance.index).getPiece();
             attackNode.transform.localPosition -= Vector3.forward * 1.1f;
             attackNode.SetColor(Color.red);
-
+            hasMove = 0;
             if(dir.Equals(Point.up))
                 transform.rotation = Quaternion.Euler(Vector3.forward * 180);
             else if(dir.Equals(Point.down))
@@ -99,6 +103,7 @@ public class NormalEnemy : Enemy
 
             moveListList.Clear();
             sprite.color = Color.red;
+
             hasMove +=1;
             if(hasMove < moveTimes)
             {
@@ -209,70 +214,6 @@ public class NormalEnemy : Enemy
                 attackNode.SetColor(Color.red);
             }
             
-        });
-        target.transform.position = piece.transform.position;
-        piece.transform.position = tmp;
-        
-    }
-    void MovePath(List<Point> pathList,int index)
-    {
-        MapNodePiece target = Map.Instance.getNodeAtPoint(pathList[index]).getPiece();
-        if(target.value == 2)
-        {
-            pauseTimes += index;
-            pauseTimes += 1;
-            if(pauseTimes >= moveTimes)
-            {
-                pauseTimes = 0;
-                return;
-            }
-            else
-            {
-                FindTheWay(detectDis,piece.index,Player.Instance.index);
-                FindTheLowestPath();
-                if(moveList.Count != 0)
-                    MovePath(moveList,0);
-            }
-                
-        }
-        if(index >= moveTimes || pathList.IndexOf(pathList[index]) == pathList.Count-1)
-        {
-            if( CheckBeside() != null)
-            {
-                attackNode = Map.Instance.getNodeAtPoint(Player.Instance.index).getPiece();
-                attackNode.transform.localPosition -= Vector3.forward;
-                attackNode.SetColor(Color.red);
-            }
-            return;
-        }
-            
-        
-        if(Mathf.Abs(pathList[index].x - piece.index.x) == 0)
-        {
-            if(pathList[index].y - piece.index.y > 0)
-                transform.rotation = transform.rotation = Quaternion.Euler(Vector3.forward * 180);
-            else
-                transform.rotation = Quaternion.Euler(Vector3.zero);
-        }
-        else
-        {
-            if(pathList[index].x - piece.index.x > 0)
-                transform.rotation = Quaternion.Euler(Vector3.forward * -90);
-            else
-                transform.rotation = Quaternion.Euler(Vector3.forward * 90);
-        }
-
-        
-        piece.transform.parent = null;
-        Map.Instance.SwitchNodePieceAndValue(piece.index,pathList[index]);
-        var tmp = target.transform.position;
-        
-        transform.DOMove(target.transform.position,0.2f).OnComplete(()=>
-        {
-            piece.transform.parent = transform;
-            piece.transform.localPosition = Vector3.zero;
-            
-            MovePath(pathList,index+1);
         });
         target.transform.position = piece.transform.position;
         piece.transform.position = tmp;

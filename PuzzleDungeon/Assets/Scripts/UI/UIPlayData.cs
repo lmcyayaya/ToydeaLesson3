@@ -44,10 +44,20 @@ public class UIPlayData : MonoBehaviour
     {
         level.text = PlayerData.Instance.CurrentLevel.ToString();
         currentExp.text = PlayerData.Instance.currentExp.ToString();
-        targetExp.text = (PlayerData.Instance.CurrentLevel * 80).ToString();
-        float a = PlayerData.Instance.currentExp - (PlayerData.Instance.CurrentLevel *80);
-        float i = a / 80;
-        currentExpBar.DOFillAmount( i,0.5f).SetEase(Ease.OutQuart);
+        float tmp = 0;
+        for(int j = 1; j <= PlayerData.Instance.CurrentLevel; j++)
+        {
+            tmp += (80 + ((j - 1) *40));
+        }
+        targetExp.text = tmp.ToString();
+        float tmp2 = 0;
+        for(int j = 1; j < PlayerData.Instance.CurrentLevel; j++)
+        {
+            tmp2 += (80 + ((j - 1) *40));
+        }
+        float a = (80 + ((PlayerData.Instance.CurrentLevel - 1) * 40));
+        float i =(PlayerData.Instance.currentExp - tmp2) / a;
+        currentExpBar.DOFillAmount(i,0.5f).SetEase(Ease.OutQuart);
         atk.text = PlayerData.Instance.ATK.ToString();
         def.text = PlayerData.Instance.DEF.ToString();
         move.text = PlayerData.Instance.MOVE.ToString();

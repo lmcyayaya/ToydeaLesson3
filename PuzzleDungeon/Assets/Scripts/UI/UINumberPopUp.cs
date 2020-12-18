@@ -84,4 +84,20 @@ public class UINumberPopUp : MonoBehaviour
             });
         });
     }
+    public void ShowPoints(Vector3 dataPagePos)
+    {
+        text.text = "+" + amount;
+        text.rectTransform.DOScale(Vector2.one * 1.5f,0.5f).SetEase(Ease.OutQuart);
+        transform.DOMove(transform.position + Vector3.up * 0.32f,0.5f).SetEase(Ease.OutQuart).OnComplete(()=>
+        {
+            transform.DOMove(dataPagePos,0.5f).SetEase(Ease.OutQuart).SetDelay(0.5f);
+            text.rectTransform.DOScale(Vector2.zero,0.5f).SetEase(Ease.OutQuart).SetDelay(1).OnComplete(()=>
+            {
+                text.rectTransform.localScale = Vector2.zero;
+                ObjectPool.ReturnToPool(transform.gameObject);
+            });
+        }
+        );
+        
+    }
 }

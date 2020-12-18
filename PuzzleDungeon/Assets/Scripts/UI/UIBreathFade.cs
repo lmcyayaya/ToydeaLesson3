@@ -10,25 +10,50 @@ public class UIBreathFade : MonoBehaviour
     public Ease ease;
     Image image;
     Tween tween;
-    void Start() 
+    void Awake() 
     {
         image = GetComponent<Image>();   
     }
     public void FadeIn()
     {
-        tween = image.DOFade(fadeInAmount,duration).SetEase(ease).OnComplete(()=>
+        if(tween!=null)
         {
-            tween = null;
-            FadeOut();
-        });
+            tween.Kill(); 
+            tween = image.DOFade(fadeInAmount,duration).SetEase(ease).OnComplete(()=>
+            {
+                tween = null;
+                FadeOut();
+            });
+        }
+        else
+        {
+            tween = image.DOFade(fadeInAmount,duration).SetEase(ease).OnComplete(()=>
+            {
+                tween = null;
+                FadeOut();
+            });
+        }
+       
     }
     public void FadeOut()
     {
-        tween = image.DOFade(0,duration).SetEase(ease).OnComplete(()=>
+        if(tween!=null)
         {
-            tween = null;
-            FadeIn();
-        });
+            tween.Kill();
+            tween = image.DOFade(0,duration).SetEase(ease).OnComplete(()=>
+            {
+                tween = null;
+                FadeIn();
+            });
+        }
+        else
+        {
+            tween = image.DOFade(0,duration).SetEase(ease).OnComplete(()=>
+            {
+                tween = null;
+                FadeIn();
+            });
+        }
     }
     public void Stop()
     {

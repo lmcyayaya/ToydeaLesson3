@@ -14,6 +14,8 @@ public class MovePieces : MonoBehaviour
     static MovePieces instance;
     public Canvas canvas;
     public RectTransform selectBox;
+    public RectTransform verticalSelectLine;
+    public RectTransform horizontalSelectLine;
     Match3 game;
     NodePiece selectedPiece;
     List<NodePiece> moving;
@@ -57,8 +59,8 @@ public class MovePieces : MonoBehaviour
                 else if(aDir.y > aDir.x)
                     cDir = 2;
             }
-            else if(dir.magnitude < 32)
-                cDir = 0;
+            // else if(dir.magnitude < 32)
+            //     cDir = 0;
 
             //avoid piece cross over the board 避免拉超過盤面 每個位置上的珠子都只能拉到最旁邊為止
             switch(selectedPiece.index.x)
@@ -180,12 +182,16 @@ public class MovePieces : MonoBehaviour
 
             if(Mathf.Abs((int)((disX)/63)) > 0 || Mathf.Abs((int)((disY)/63)) > 0)
                 StateManager.Instance.state = StateManager.State.turning;
-
+            
+            verticalSelectLine.gameObject.SetActive(false);
+            horizontalSelectLine.gameObject.SetActive(false);
 
             switch(cDir)
             {
                 case 1:
                 {
+                    horizontalSelectLine.gameObject.SetActive(true);
+                    horizontalSelectLine.position = new Vector2(horizontalSelectLine.position.x,selectedPiece.rect.position.y);
                     moving = game.getNodePiecesFromTheSameLineX(selectedPiece);
                     foreach(NodePiece piece in moving)
                     {
@@ -198,6 +204,8 @@ public class MovePieces : MonoBehaviour
                     
                 case 2:
                 {
+                    verticalSelectLine.gameObject.SetActive(true);
+                    verticalSelectLine.position = new Vector2(selectedPiece.rect.position.x,verticalSelectLine.position.y);
                     moving = game.getNodePiecesFromTheSameLineY(selectedPiece);
                     foreach(NodePiece piece in moving)
                     {
@@ -230,6 +238,9 @@ public class MovePieces : MonoBehaviour
         
         selectedPiece = null;
         selectBox.anchoredPosition = new Vector2(-432,0);
+        verticalSelectLine.gameObject.SetActive(false);
+        horizontalSelectLine.gameObject.SetActive(false);
+        cDir = 0;
 
         if (moving == null || moveAmount == 0)
         {

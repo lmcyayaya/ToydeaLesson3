@@ -285,8 +285,8 @@ public class Match3 : MonoBehaviour
                 NodePiece nodePiece =node.getPiece();
                 if(nodePiece!=null)
                 {
-                    nodePiece.transform.DORotate(Vector3.forward * 360,0.4f,RotateMode.WorldAxisAdd).SetEase(Ease.InQuart);
-                    nodePiece.transform.DOScale(Vector3.zero,0.4f).SetEase(Ease.InQuart).OnComplete(()=>
+                    nodePiece.transform.DORotate(Vector3.forward * 360,0.4f,RotateMode.WorldAxisAdd).SetEase(Ease.OutQuad);
+                    nodePiece.transform.DOScale(Vector3.zero,0.4f).SetEase(Ease.OutQuad).OnComplete(()=>
                     {
                         nodePiece.transform.localScale = Vector3.one;
                         nodePiece.transform.rotation = Quaternion.Euler(Vector3.zero);

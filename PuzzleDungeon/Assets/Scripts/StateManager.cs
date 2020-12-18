@@ -92,7 +92,7 @@ public class StateManager : MonoBehaviour
                         }
                     }
                     treasureChestEnemy.EnemyNeedToDO();
-                    StartCoroutine(WaitToDo(mostTimes*0.2f,()=> state = State.myTurn)); 
+                    StartCoroutine(WaitToDo(mostTimes*0.25f,()=> state = State.myTurn)); 
                 }
                 
                 break;

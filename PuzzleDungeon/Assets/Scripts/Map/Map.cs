@@ -73,7 +73,7 @@ public class Map : MonoBehaviour
                 GameObject p = Instantiate(road, transform);
                 MapNodePiece piece = p.GetComponent<MapNodePiece>();
                 Transform rect = p.GetComponent<Transform>();
-                rect.position = new Vector2(transform.position.x + (cellSize * x)+cellSize/2, transform.position.y - (cellSize * y)-cellSize/2);
+                rect.position = new Vector3(transform.position.x + (cellSize * x)+cellSize/2, transform.position.y - (cellSize * y)-cellSize/2,0.1f);
                 node.SetPiece(piece);
                 node.getPiece().FirstTime();
                 

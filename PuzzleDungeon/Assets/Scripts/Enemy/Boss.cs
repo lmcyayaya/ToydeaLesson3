@@ -86,6 +86,13 @@ public class Boss : Enemy
         currentWeakPoint = ChangeWeakPoint();
         
     }
+    public override void Dead()
+    {
+        if(currentHP <= 0)
+        {
+            transform.gameObject.SetActive(false);
+        }
+    }
     void CutAttack()
     {
         bool minusHP = false;

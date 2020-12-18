@@ -19,7 +19,7 @@ public class AttackTrigger : MonoBehaviour
     }
     void Update()
     {
-        if(Player.Instance.transform.position == transform.position)
+        if(Player.Instance.index.Equals(index))
         {
             playerInHere = true;
             if(!boss.playerInNow.Contains(this))

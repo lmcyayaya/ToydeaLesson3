@@ -15,10 +15,10 @@ public class UIPlayerSP : UIBar
     void Update()
     {
         //ShowUI();
-        maxAmount = PlayerData.Instance.maxSP;
+        MaxAmount = PlayerData.Instance.maxSP;
         CurrentAmount = PlayerData.Instance.currentSP;
 
-        text.text = currentAmount+" / "+maxAmount;
+        text.text = currentAmount+" / "+MaxAmount;
 
     }
 }

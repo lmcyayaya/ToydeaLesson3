@@ -12,7 +12,7 @@ public class UIBar : MonoBehaviour
     public Image front;
     public GameObject effect;
     [HideInInspector]
-    public float CurrentAmount
+    protected float CurrentAmount
     {
         get
         {
@@ -34,6 +34,21 @@ public class UIBar : MonoBehaviour
         }
     }
     protected float currentAmount;
+    protected float MaxAmount
+    {
+        get
+        {
+            return maxAmount;
+        }
+        set
+        {
+            if(value!=maxAmount)
+            {
+                maxAmount = value;
+                HPDoFillAmount();
+            }
+        }
+    }
     protected float maxAmount;
     void HPDoFillAmount()
     {

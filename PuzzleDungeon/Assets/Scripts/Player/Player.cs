@@ -233,7 +233,16 @@ public class Player : MonoBehaviour
                     return;
                 var boss = piece.GetComponentInParent<Boss>();
                 if(boss != null && boss.currentWeakPoint == piece )
+                {
+                    var damageText = ObjectPool.TakeFromPool("Damage");
+                    damageText.position = boss.transform.position;
+                    var ui = damageText.GetComponent<UINumberPopUp>();
+                    ui.amount = ProcessedData.Instance.atk * 2;
+                    ui.ShowDamage();
                     boss.currentHP -= ProcessedData.Instance.atk * 2;
+                    boss.Dead();
+                }
+                    
                 else
                 {
                     Enemy enemy = piece.GetComponentInParent<Enemy>();

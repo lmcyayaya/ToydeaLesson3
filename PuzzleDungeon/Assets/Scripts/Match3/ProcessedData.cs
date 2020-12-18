@@ -44,10 +44,13 @@ public class ProcessedData : MonoBehaviour
     {
         atk = (int)((1 + (atkDropsCount - 3) * 0.25f) * PlayerData.Instance.ATK * (1 + (combo - 1) * 0.25f));
         def = (int)((1 + (defDropsCount - 3) * 0.25f) * PlayerData.Instance.DEF * (1 + (combo - 1) * 0.25f));
-        move =(int)((1 + (moveDropsCount- 3) * 0.25f) * PlayerData.Instance.MOVE* (1 + (combo - 1) * 0.5f ));
+        float tmp = Mathf.Clamp((0.5f - (PlayerData.Instance.MOVE * 0.1f)),0,float.MaxValue);
+        move =(int)((1 + (moveDropsCount- 3) * 0.25f) * PlayerData.Instance.MOVE * (1 + (combo - 1) * tmp));
         hp =  (int)((1 + (hpDropsCount -  3) * 0.25f) * PlayerData.Instance.HP  * (1 + (combo - 1) * 0.25f));
         sp =  (int)((1 + (spDropsCount -  3) * 0.25f) * PlayerData.Instance.SP  * (1 + (combo - 1) * 0.25f));
         move = Mathf.Clamp(move,0,10);
+        if(moveDropsCount == 0)
+            move = 0;
         if(defDropsCount == 0)
             def = 0;
         if(hpDropsCount == 0)

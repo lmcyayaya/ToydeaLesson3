@@ -25,12 +25,15 @@ public class PlayerData : MonoBehaviour
                 currentLevel = value;
                 remainPoint += 3;
                 levelUpHint.FadeIn();
+                if(value!=1)
+                    levelUp.ShowUp();
             }
         }
             
     }
     int currentLevel;
     public UIBreathFade levelUpHint;
+    public UILevelUp levelUp;
     
     public bool isPoision;
     public int times;
@@ -55,12 +58,28 @@ public class PlayerData : MonoBehaviour
     }
     void Start()
     {
+        
+        CurrentLevel +=1;
+        maxHP = CurrentLevel * 100;
+        maxSP = CurrentLevel * 50;
         currentHP = maxHP;
         currentSP = maxSP;
     }
     void Update()
     {
-        CurrentLevel = (currentExp + 80) / 80;
+        maxHP = CurrentLevel * 100;
+        maxSP = CurrentLevel * 50;
+        var tmp = currentExp;
+        for(int i  = 1; i < currentLevel; i++)
+        {
+            tmp -= (80 + ((i - 1) *40));
+        }
+        var tmp2 = 80 + ((currentLevel - 1) * 40);
+        if(tmp / tmp2 >= 1)
+        {
+            CurrentLevel +=1;
+        }
+        
         currentSP = Mathf.Clamp(currentSP,0,maxSP);
         currentHP = Mathf.Clamp(currentHP,0,maxHP);
 

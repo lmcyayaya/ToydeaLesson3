@@ -16,13 +16,12 @@ public class UIPlayerHPBar : UIBar
     
     void Update()
     {
-        //ShowUI();
-        maxAmount = PlayerData.Instance.maxHP;
+        MaxAmount = PlayerData.Instance.maxHP;
         CurrentAmount = PlayerData.Instance.currentHP;
         if(effect.activeSelf)
             if(!effect.GetComponent<ParticleSystem>().IsAlive())
                 effect.SetActive(false);
-        text.text = currentAmount+" / "+maxAmount;
+        text.text = currentAmount + " / " + MaxAmount;
 
     }
     protected override void HurtEffect()
