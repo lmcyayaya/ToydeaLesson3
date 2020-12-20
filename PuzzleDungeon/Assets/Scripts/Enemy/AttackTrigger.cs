@@ -34,10 +34,17 @@ public class AttackTrigger : MonoBehaviour
             
         if(index.x == 0 && index.y == 0)
         {
-            RaycastHit2D hit =  Physics2D.Raycast(transform.position + Vector3.forward*0.01f,Vector3.forward);
-            MapNodePiece piece = hit.transform.GetComponent<MapNodePiece>();
-            index.x = piece.index.x;
-            index.y = piece.index.y;
+            if(Physics2D.Raycast(transform.position + Vector3.forward * 0.01f,Vector3.forward))
+            {
+                RaycastHit2D hit = Physics2D.Raycast(transform.position + Vector3.forward * 0.01f,Vector3.forward);
+                if(hit.transform.GetComponent<MapNodePiece>() != null)
+                {
+                    MapNodePiece piece = hit.transform.GetComponent<MapNodePiece>();
+                    index.x = piece.index.x;
+                    index.y = piece.index.y;
+                }
+            }
+
         }
             
     }

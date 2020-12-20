@@ -231,7 +231,11 @@ public class Player : MonoBehaviour
             {
                 clickOnce = true;
                 var hit = Physics2D.Raycast(new Vector2(Camera.main.ScreenToWorldPoint(Input.mousePosition).x,Camera.main.ScreenToWorldPoint(Input.mousePosition).y), Vector2.zero, 0f);
-                MapNodePiece piece =  hit.transform.GetComponent<MapNodePiece>();
+                MapNodePiece piece = null;
+                if(hit.transform != null)
+                {
+                    piece = hit.transform.GetComponent<MapNodePiece>();
+                }
                 if(piece == null)
                     return;
                 if(!Map.Instance.isContainPointInPointList(canAttackList,piece.index))

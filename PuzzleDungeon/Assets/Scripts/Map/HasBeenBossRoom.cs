@@ -5,6 +5,8 @@ using UnityEngine;
 public class HasBeenBossRoom : MonoBehaviour
 {
     public GameObject mist;
+    public Point bossRoomStartIndex;
+    public Point bossRoomEndIndex;
     public Point[] triggerBossRoom;
     bool hasBeenBossRoom = false;
     Boss boss;
@@ -33,9 +35,9 @@ public class HasBeenBossRoom : MonoBehaviour
         {
             piece.sprite.color = piece.lastColor; 
         }
-        for(int x = 11 ; x < 24; x++)
+        for(int x = bossRoomStartIndex.x ; x < bossRoomEndIndex.x; x++)
         {
-            for(int y = 0; y < 14; y++)
+            for(int y = bossRoomStartIndex.y; y < bossRoomEndIndex.y; y++)
             {
                 MapNodePiece piece = Map.Instance.getNodeAtPoint(new Point(x,y)).getPiece();
                 piece.sprite.color = piece.lastColor;

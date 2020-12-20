@@ -25,6 +25,7 @@ public class UIPlayData : MonoBehaviour
     public  Text hpTotalPlus;
     public  Text spTotalPlus;
     int ori_remainPoint;
+    int tmpRemainPoint;
     RectTransform rect;
     Vector2 oriPos;
     Tween tween;
@@ -63,13 +64,17 @@ public class UIPlayData : MonoBehaviour
         move.text = PlayerData.Instance.MOVE.ToString();
         hp.text = PlayerData.Instance.HP.ToString();
         sp.text = PlayerData.Instance.SP.ToString();
-        remainPoint.text = PlayerData.Instance.remainPoint.ToString();
-        ori_remainPoint = PlayerData.Instance.remainPoint;
+        tmpRemainPoint = PlayerData.Instance.remainPoint;
+        remainPoint.text = tmpRemainPoint.ToString();
         atkTotalPlus.text = "+0";
         defTotalPlus.text = "+0";
         moveTotalPlus.text = "+0";
         hpTotalPlus.text = "+0";
         spTotalPlus.text = "+0";
+    }
+    public void ResetData()
+    {
+
     }
     public void OpenPage()
     {
@@ -122,10 +127,10 @@ public class UIPlayData : MonoBehaviour
     }
     public void ATKPlusButton()
     {   
-        if(PlayerData.Instance.remainPoint < 1)
+        if(tmpRemainPoint < 1)
             return;
-        PlayerData.Instance.remainPoint -=1;
-        remainPoint.text = PlayerData.Instance.remainPoint.ToString();
+        tmpRemainPoint -= 1;
+        remainPoint.text = tmpRemainPoint.ToString();
         int i = Convert.ToInt32(atk.text);
         i += 1;
         atk.text = i.ToString();
@@ -138,17 +143,17 @@ public class UIPlayData : MonoBehaviour
         i -= 1;
         if(i < PlayerData.Instance.ATK)
             return;
-        PlayerData.Instance.remainPoint += 1;
-        remainPoint.text = PlayerData.Instance.remainPoint.ToString();
+        tmpRemainPoint += 1;
+        remainPoint.text = tmpRemainPoint.ToString();
         atk.text = i.ToString();
         atkTotalPlus.text = "+"+(i - PlayerData.Instance.ATK).ToString();
     }
     public void DEFPlusButton()
     {   
-        if(PlayerData.Instance.remainPoint < 1)
+        if(tmpRemainPoint < 1)
             return;
-        PlayerData.Instance.remainPoint -=1;
-        remainPoint.text = PlayerData.Instance.remainPoint.ToString();
+        tmpRemainPoint -= 1;
+        remainPoint.text = tmpRemainPoint.ToString();
         int i = Convert.ToInt32(def.text);
         i += 1;
         def.text = i.ToString();
@@ -161,17 +166,17 @@ public class UIPlayData : MonoBehaviour
         i -= 1;
         if(i < PlayerData.Instance.DEF)
             return;
-        PlayerData.Instance.remainPoint += 1;
-        remainPoint.text = PlayerData.Instance.remainPoint.ToString();
+        tmpRemainPoint += 1;
+        remainPoint.text = tmpRemainPoint.ToString();
         def.text = i.ToString();
         defTotalPlus.text = "+"+(i - PlayerData.Instance.DEF).ToString();
     }
     public void MOVEPlusButton()
     {   
-        if(PlayerData.Instance.remainPoint < 5 || Convert.ToInt32(move.text) >= 10)
+        if(tmpRemainPoint < 5 || Convert.ToInt32(move.text) >= 10)
             return;
-        PlayerData.Instance.remainPoint -=5;
-        remainPoint.text = PlayerData.Instance.remainPoint.ToString();
+        tmpRemainPoint -=5;
+        remainPoint.text = tmpRemainPoint.ToString();
         int i = Convert.ToInt32(move.text);
         i += 1;
         move.text = i.ToString();
@@ -184,17 +189,17 @@ public class UIPlayData : MonoBehaviour
         i -= 1;
         if(i < PlayerData.Instance.MOVE)
             return;
-        PlayerData.Instance.remainPoint += 5;
-        remainPoint.text = PlayerData.Instance.remainPoint.ToString();
+        tmpRemainPoint += 5;
+        remainPoint.text = tmpRemainPoint.ToString();
         move.text = i.ToString();
         moveTotalPlus.text = "+"+(i - PlayerData.Instance.MOVE).ToString();
     }
     public void HPPlusButton()
     {   
-        if(PlayerData.Instance.remainPoint < 1)
+        if(tmpRemainPoint < 1)
             return;
-        PlayerData.Instance.remainPoint -=1;
-        remainPoint.text = PlayerData.Instance.remainPoint.ToString();
+        tmpRemainPoint -= 1;
+        remainPoint.text = tmpRemainPoint.ToString();
         int i = Convert.ToInt32(hp.text);
         i += 10;
         hp.text = i.ToString();
@@ -207,17 +212,17 @@ public class UIPlayData : MonoBehaviour
         i -= 10;
         if(i < PlayerData.Instance.HP)
             return;
-        PlayerData.Instance.remainPoint += 1;
-        remainPoint.text = PlayerData.Instance.remainPoint.ToString();
+        tmpRemainPoint += 1;
+        remainPoint.text = tmpRemainPoint.ToString();
         hp.text = i.ToString();
         hpTotalPlus.text = "+"+(i - PlayerData.Instance.HP).ToString();
     }
     public void SPPlusButton()
     {   
-        if(PlayerData.Instance.remainPoint < 1)
+        if(tmpRemainPoint < 1)
             return;
-        PlayerData.Instance.remainPoint -=1;
-        remainPoint.text = PlayerData.Instance.remainPoint.ToString();
+        tmpRemainPoint -= 1;
+        remainPoint.text = tmpRemainPoint.ToString();
         int i = Convert.ToInt32(sp.text);
         i += 5;
         sp.text = i.ToString();
@@ -230,14 +235,14 @@ public class UIPlayData : MonoBehaviour
         i -= 5;
         if(i < PlayerData.Instance.SP)
             return;
-        PlayerData.Instance.remainPoint += 1;
-        remainPoint.text = PlayerData.Instance.remainPoint.ToString();
+        tmpRemainPoint += 1;
+        remainPoint.text = tmpRemainPoint.ToString();
         sp.text = i.ToString();
         spTotalPlus.text = "+"+(i - PlayerData.Instance.SP).ToString();
     }
     public void ResetPoints()
     {
-        PlayerData.Instance.remainPoint = ori_remainPoint;
+        tmpRemainPoint = PlayerData.Instance.remainPoint;
         CopyCurrentData();
         atkTotalPlus.text = "+0";
         defTotalPlus.text = "+0";
@@ -247,6 +252,7 @@ public class UIPlayData : MonoBehaviour
     }
     public void Confirm()
     {
+        PlayerData.Instance.remainPoint = tmpRemainPoint;
         PlayerData.Instance.ATK = Convert.ToInt32(atk.text);
         PlayerData.Instance.DEF = Convert.ToInt32(def.text);
         PlayerData.Instance.MOVE= Convert.ToInt32(move.text);

@@ -25,6 +25,8 @@ public class StateManager : MonoBehaviour
     int mostTimes = 0;
     bool enemyHasAction;
     bool firstTime = false;
+    bool f8KeyUp;
+    bool f5KeyUp;
     Match3 game;
     void Awake() 
     {
@@ -33,6 +35,7 @@ public class StateManager : MonoBehaviour
     void Start()
     {
         game = GetComponent<Match3>();
+        //Screen.SetResolution((Screen.height*9) / 16,Screen.height,false);
     }
 
 
@@ -48,6 +51,25 @@ public class StateManager : MonoBehaviour
                     Player.Instance.DetectMap(Player.Instance.detectedMapDis,Player.Instance.index);
                 }
                 enemyHasAction = false;
+                if(Input.GetKey(KeyCode.F8) && !f8KeyUp) 
+                {
+                    f8KeyUp = true;
+                    PlayerData.Instance.currentExp += 100;
+                }
+                else if(!Input.GetKey(KeyCode.F8) && f8KeyUp)
+                {
+                    f8KeyUp = false;
+                }
+
+                if(Input.GetKey(KeyCode.F5) && !f5KeyUp)
+                {
+                    f5KeyUp = true;
+                    PlayerData.Instance.remainPoint += 3;
+                }
+                else if(!Input.GetKey(KeyCode.F5) && f5KeyUp)
+                {
+                    f5KeyUp = false;
+                }
                 break;
             }
             case State.turning :
