@@ -21,6 +21,7 @@ public class Player : MonoBehaviour
     public PlayerState playerState;
     public Point index;
     public UIState uiState;
+    public int detectedMapDis;
     public bool hasAttacked;
     bool moving;
     bool attackReady;
@@ -157,6 +158,10 @@ public class Player : MonoBehaviour
             canMoveList.Add(index);
             FindCanMovePoints(Mathf.Clamp(ProcessedData.Instance.move,0,5),index);
             canMoveList.Remove(index);
+            if(canMoveList.Count == 0)
+            {
+                ProcessedData.Instance.move = 0;
+            }
             ChangeGridColor(canMoveList,Color.green);
             uiState.ChangeState("移動選択");
         }
@@ -465,7 +470,7 @@ public class Player : MonoBehaviour
         transform.DOMove(Map.Instance.getNodeAtPoint(path[i]).getPiece().transform.position,0.2f).OnComplete(()=>
         {
             index = path[i];
-            DetectMap(5,index);
+            DetectMap(detectedMapDis,index);
             if( i+1 < path.Count)
                Move(path,i+1);
             else

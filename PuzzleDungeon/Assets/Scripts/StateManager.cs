@@ -45,7 +45,7 @@ public class StateManager : MonoBehaviour
                 if(!firstTime)
                 {
                     firstTime = true;
-                    Player.Instance.DetectMap(5,Player.Instance.index);
+                    Player.Instance.DetectMap(Player.Instance.detectedMapDis,Player.Instance.index);
                 }
                 enemyHasAction = false;
                 break;

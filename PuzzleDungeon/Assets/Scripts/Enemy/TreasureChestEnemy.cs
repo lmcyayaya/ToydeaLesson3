@@ -52,7 +52,7 @@ public class TreasureChestEnemy : Enemy
         piece.value = 0;
         Map.Instance.getNodeAtPoint(piece.index).value = 0;
         sprite.color -= new Color(0,0,0,1);
-        Player.Instance.DetectMap(5,Player.Instance.index);
+        Player.Instance.DetectMap(Player.Instance.detectedMapDis,Player.Instance.index);
         CloseAttackPiece();
     }
     public override void EnemyNeedToDO()
