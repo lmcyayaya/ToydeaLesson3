@@ -22,10 +22,12 @@ public class StateManager : MonoBehaviour
     public NormalEnemy[] enemys;
     public TreasureChestEnemy treasureChestEnemy;
     public Boss boss;
+    public Point bossRoom;
     int mostTimes = 0;
     bool enemyHasAction;
     bool firstTime = false;
-    bool f8KeyUp;
+    bool f7KeyUp;
+    bool f6KeyUp;
     bool f5KeyUp;
     Match3 game;
     void Awake() 
@@ -35,7 +37,7 @@ public class StateManager : MonoBehaviour
     void Start()
     {
         game = GetComponent<Match3>();
-        //Screen.SetResolution((Screen.height*9) / 16,Screen.height,false);
+        Screen.SetResolution(540,960,false);
     }
 
 
@@ -51,14 +53,25 @@ public class StateManager : MonoBehaviour
                     Player.Instance.DetectMap(Player.Instance.detectedMapDis,Player.Instance.index);
                 }
                 enemyHasAction = false;
-                if(Input.GetKey(KeyCode.F8) && !f8KeyUp) 
+                if(Input.GetKey(KeyCode.F7) && !f7KeyUp) 
                 {
-                    f8KeyUp = true;
+                    f7KeyUp = true;
                     PlayerData.Instance.currentExp += 100;
                 }
-                else if(!Input.GetKey(KeyCode.F8) && f8KeyUp)
+                else if(!Input.GetKey(KeyCode.F8) && f7KeyUp)
                 {
-                    f8KeyUp = false;
+                    f7KeyUp = false;
+                }
+                if(Input.GetKey(KeyCode.F6) && !f6KeyUp)
+                {
+                    f6KeyUp = true;
+                    Player.Instance.transform.position = Map.Instance.getNodeAtPoint(bossRoom).getPiece().transform.position;
+                    Player.Instance.index = new Point(bossRoom.x,bossRoom.y);
+                    Player.Instance.DetectMap(Player.Instance.detectedMapDis,Player.Instance.index);
+                }
+                else if(!Input.GetKey(KeyCode.F6) && f6KeyUp)
+                {
+                    f6KeyUp = false;
                 }
 
                 if(Input.GetKey(KeyCode.F5) && !f5KeyUp)

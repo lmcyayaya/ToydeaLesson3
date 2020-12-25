@@ -132,7 +132,7 @@ public class UIPlayData : MonoBehaviour
         tmpRemainPoint -= 1;
         remainPoint.text = tmpRemainPoint.ToString();
         int i = Convert.ToInt32(atk.text);
-        i += 1;
+        i += 2;
         atk.text = i.ToString();
         atkTotalPlus.text = "+"+(i - PlayerData.Instance.ATK).ToString();
         
@@ -140,7 +140,7 @@ public class UIPlayData : MonoBehaviour
     public void ATKMinusButton()
     {   
         int i = Convert.ToInt32(atk.text);
-        i -= 1;
+        i -= 2;
         if(i < PlayerData.Instance.ATK)
             return;
         tmpRemainPoint += 1;
@@ -155,7 +155,7 @@ public class UIPlayData : MonoBehaviour
         tmpRemainPoint -= 1;
         remainPoint.text = tmpRemainPoint.ToString();
         int i = Convert.ToInt32(def.text);
-        i += 1;
+        i += 2;
         def.text = i.ToString();
         defTotalPlus.text = "+"+(i - PlayerData.Instance.DEF).ToString();
         
@@ -163,7 +163,7 @@ public class UIPlayData : MonoBehaviour
     public void DEFMinusButton()
     {   
         int i = Convert.ToInt32(def.text);
-        i -= 1;
+        i -= 2;
         if(i < PlayerData.Instance.DEF)
             return;
         tmpRemainPoint += 1;

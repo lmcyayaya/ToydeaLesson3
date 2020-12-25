@@ -23,10 +23,11 @@ public class Player : MonoBehaviour
     public UIState uiState;
     public int detectedMapDis;
     public bool hasAttacked;
+    public bool stopMoving;
     bool moving;
     bool attackReady;
     bool clickOnce;
-    int actionState;
+    public int actionState;
     List<Point> canMoveList;
     List<Point> moveList;
     List<List<Point>> moveListList; 
@@ -46,7 +47,7 @@ public class Player : MonoBehaviour
 
     public void ActionUpdate()
     {
-        if(moving)
+        if(moving || stopMoving)
             return;
         //actionState : 0 is first in ,1 is first action,2  is second action ,this action complete will rest state and turn the state of statemanager to enemyTurn
         switch(actionState) 
@@ -186,7 +187,6 @@ public class Player : MonoBehaviour
                 FindTheWay(Mathf.Clamp(ProcessedData.Instance.move,0,5),index,piece .index);
                 FindTheLowestPath();
                 Move(moveList,0);
-                ProcessedData.Instance.move -= moveList.Count;
                 ResetGridColor(canMoveList);
                 moveListList.Clear();
                 canMoveList.Clear();
@@ -434,6 +434,12 @@ public class Player : MonoBehaviour
     }
     void Move(List<Point> path,int i)
     {
+        if(stopMoving)
+        {
+            moving = false;
+            return;
+        }
+            
         moving = true;
         
         if(i > 0)
@@ -471,9 +477,10 @@ public class Player : MonoBehaviour
                     transform.rotation = Quaternion.Euler(Vector3.forward * 90);
             }
         }
+        index = path[i];
         transform.DOMove(Map.Instance.getNodeAtPoint(path[i]).getPiece().transform.position,0.2f).OnComplete(()=>
         {
-            index = path[i];
+            ProcessedData.Instance.move -= 1;
             DetectMap(detectedMapDis,index);
             if( i+1 < path.Count)
                Move(path,i+1);
